@@ -41,3 +41,53 @@ class WorkshopTaskItem {
   final String assigneeId;
   final String assigneeName;
 }
+
+/// Ombordagi mahsulot kategoriyasi.
+enum WarehouseCategory {
+  clothing,
+  material,
+  accessory,
+  other;
+
+  String get uzLabel => switch (this) {
+        WarehouseCategory.clothing => 'Kiyim',
+        WarehouseCategory.material => 'Material',
+        WarehouseCategory.accessory => 'Aksessuar',
+        WarehouseCategory.other => 'Boshqa',
+      };
+}
+
+/// Ombordagi bitta mahsulot yozuvi.
+class WarehouseItem {
+  const WarehouseItem({
+    required this.id,
+    required this.name,
+    required this.quantity,
+    required this.unit,
+    required this.category,
+  });
+
+  final String id;
+  final String name;
+  final int quantity;
+
+  /// O'lchov birligi: 'ta', 'metr', 'kg', va h.k.
+  final String unit;
+  final WarehouseCategory category;
+
+  WarehouseItem copyWith({
+    String? id,
+    String? name,
+    int? quantity,
+    String? unit,
+    WarehouseCategory? category,
+  }) {
+    return WarehouseItem(
+      id: id ?? this.id,
+      name: name ?? this.name,
+      quantity: quantity ?? this.quantity,
+      unit: unit ?? this.unit,
+      category: category ?? this.category,
+    );
+  }
+}

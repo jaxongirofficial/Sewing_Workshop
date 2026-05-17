@@ -10,6 +10,7 @@ import '../../features/dashboard/presentation/pages/tabs/attendance_tab_page.dar
 import '../../features/dashboard/presentation/pages/tabs/home_tab_page.dart';
 import '../../features/dashboard/presentation/pages/tabs/profile_tab_page.dart';
 import '../../features/dashboard/presentation/pages/tabs/tasks_tab_page.dart';
+import '../../features/dashboard/presentation/pages/tabs/warehouse_tab_page.dart';
 import '../../features/dashboard/presentation/shell/role_shell_scaffold.dart';
 import 'route_paths.dart';
 
@@ -86,6 +87,17 @@ StatefulShellRoute _ownerShell() {
       StatefulShellBranch(
         routes: [
           GoRoute(
+            path: AppRoutes.ownerWarehouse,
+            pageBuilder: (c, s) => NoTransitionPage<void>(
+                  key: s.pageKey,
+                  child: const WarehouseTabPage(role: UserRole.owner),
+                ),
+          ),
+        ],
+      ),
+      StatefulShellBranch(
+        routes: [
+          GoRoute(
             path: AppRoutes.ownerProfile,
             pageBuilder: (c, s) => NoTransitionPage<void>(
                   key: s.pageKey,
@@ -140,6 +152,17 @@ StatefulShellRoute _managerShell() {
       StatefulShellBranch(
         routes: [
           GoRoute(
+            path: AppRoutes.managerWarehouse,
+            pageBuilder: (c, s) => NoTransitionPage<void>(
+                  key: s.pageKey,
+                  child: const WarehouseTabPage(role: UserRole.manager),
+                ),
+          ),
+        ],
+      ),
+      StatefulShellBranch(
+        routes: [
+          GoRoute(
             path: AppRoutes.managerProfile,
             pageBuilder: (c, s) => NoTransitionPage<void>(
                   key: s.pageKey,
@@ -187,6 +210,17 @@ StatefulShellRoute _workerShell() {
             pageBuilder: (c, s) => NoTransitionPage<void>(
                   key: s.pageKey,
                   child: const TasksTabPage(role: UserRole.worker),
+                ),
+          ),
+        ],
+      ),
+      StatefulShellBranch(
+        routes: [
+          GoRoute(
+            path: AppRoutes.workerWarehouse,
+            pageBuilder: (c, s) => NoTransitionPage<void>(
+                  key: s.pageKey,
+                  child: const WarehouseTabPage(role: UserRole.worker),
                 ),
           ),
         ],

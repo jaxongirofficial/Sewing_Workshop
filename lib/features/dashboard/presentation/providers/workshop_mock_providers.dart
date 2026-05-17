@@ -103,3 +103,101 @@ final tasksProvider =
     StateNotifierProvider<TasksNotifier, List<WorkshopTaskItem>>((ref) {
   return TasksNotifier();
 });
+
+// ─── Warehouse ────────────────────────────────────────────────────────────────
+
+final class WarehouseNotifier extends StateNotifier<List<WarehouseItem>> {
+  WarehouseNotifier() : super(_seed);
+
+  static final _seed = <WarehouseItem>[
+    const WarehouseItem(
+      id: 'w-1',
+      name: 'Shim',
+      quantity: 7,
+      unit: 'ta',
+      category: WarehouseCategory.clothing,
+    ),
+    const WarehouseItem(
+      id: 'w-2',
+      name: 'Ko\'ylak',
+      quantity: 15,
+      unit: 'ta',
+      category: WarehouseCategory.clothing,
+    ),
+    const WarehouseItem(
+      id: 'w-3',
+      name: 'Yeng (qo\'l)',
+      quantity: 20,
+      unit: 'ta',
+      category: WarehouseCategory.clothing,
+    ),
+    const WarehouseItem(
+      id: 'w-4',
+      name: 'Kalta yubka',
+      quantity: 12,
+      unit: 'ta',
+      category: WarehouseCategory.clothing,
+    ),
+    const WarehouseItem(
+      id: 'w-5',
+      name: 'Jaket',
+      quantity: 5,
+      unit: 'ta',
+      category: WarehouseCategory.clothing,
+    ),
+    const WarehouseItem(
+      id: 'w-6',
+      name: 'Sumka',
+      quantity: 30,
+      unit: 'ta',
+      category: WarehouseCategory.accessory,
+    ),
+    const WarehouseItem(
+      id: 'w-7',
+      name: 'Belbog\'',
+      quantity: 25,
+      unit: 'ta',
+      category: WarehouseCategory.accessory,
+    ),
+    const WarehouseItem(
+      id: 'w-8',
+      name: 'Mato (ko\'k)',
+      quantity: 150,
+      unit: 'metr',
+      category: WarehouseCategory.material,
+    ),
+    const WarehouseItem(
+      id: 'w-9',
+      name: 'Ip (oq)',
+      quantity: 40,
+      unit: 'dona',
+      category: WarehouseCategory.material,
+    ),
+    const WarehouseItem(
+      id: 'w-10',
+      name: 'Tugma',
+      quantity: 500,
+      unit: 'dona',
+      category: WarehouseCategory.material,
+    ),
+  ];
+
+  void add(WarehouseItem item) => state = [item, ...state];
+
+  void updateQuantity(String id, int delta) {
+    state = [
+      for (final item in state)
+        if (item.id == id)
+          item.copyWith(quantity: (item.quantity + delta).clamp(0, 99999))
+        else
+          item,
+    ];
+  }
+
+  void remove(String id) => state = state.where((e) => e.id != id).toList();
+}
+
+final warehouseProvider =
+    StateNotifierProvider<WarehouseNotifier, List<WarehouseItem>>((ref) {
+  return WarehouseNotifier();
+});

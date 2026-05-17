@@ -25,6 +25,7 @@ class RoleShellScaffold extends StatelessWidget {
       0 => 'Bosh sahifa',
       1 => 'Davomat',
       2 => task,
+      3 => 'Ombor',
       _ => 'Profil',
     };
   }
@@ -52,6 +53,11 @@ class RoleShellScaffold extends StatelessWidget {
         icon: Icons.work_outline_rounded,
         activeIcon: Icons.work_rounded,
         label: taskLabel,
+      ),
+      const BrandNavItem(
+        icon: Icons.warehouse_outlined,
+        activeIcon: Icons.warehouse_rounded,
+        label: 'Ombor',
       ),
       const BrandNavItem(
         icon: Icons.account_circle_outlined,
