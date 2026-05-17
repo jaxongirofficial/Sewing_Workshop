@@ -86,9 +86,9 @@ class AppBadge extends StatelessWidget {
             AppColors.danger.withValues(alpha: 0.18),
           ),
         AppBadgeTone.accent => (
-            AppColors.ownerAccent.withValues(alpha: 0.1),
-            AppColors.ownerAccent,
-            AppColors.ownerAccent.withValues(alpha: 0.18),
+            AppColors.brand.withValues(alpha: 0.10),
+            AppColors.brand,
+            AppColors.brand.withValues(alpha: 0.20),
           ),
         AppBadgeTone.neutral => (
             scheme.surfaceContainerLow.withValues(alpha: 0.9),

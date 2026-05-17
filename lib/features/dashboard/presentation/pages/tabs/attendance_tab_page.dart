@@ -1,14 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../../../config/theme/app_spacing.dart';
+import '../../../../../config/theme/app_radius.dart';
 import '../../../../../core/enums/user_role.dart';
-import '../../../../../shared/widgets/atoms/app_card.dart';
+import '../../../../../shared/widgets/brand/brand_surface.dart';
+import '../../../../../shared/widgets/brand/brand_switch_tile.dart';
 import '../../../../auth/presentation/providers/auth_notifier.dart';
 import '../../models/workshop_mock_models.dart';
 import '../../providers/workshop_mock_providers.dart';
 
-/// Ishda / kelmagan holatini almashtirish (mock, lokal).
+/// Davomat — iOS uslubdagi switch bilan.
 class AttendanceTabPage extends ConsumerWidget {
   const AttendanceTabPage({super.key, required this.role});
 
@@ -30,56 +31,93 @@ class AttendanceTabPage extends ConsumerWidget {
 
     final hint = switch (role) {
       UserRole.worker =>
-        'Faqat o\'zingizni belgilashingiz mumkin. Kirish/chiqish vaqti demo.',
+        'Faqat o\'zingizni belgilashingiz mumkin.',
       UserRole.manager =>
         'Liniya ishchilari — ishda yoki yo\'qligini belgilang.',
-      UserRole.owner => 'Barcha ishchilar holati (demo ma\'lumot).',
+      UserRole.owner => 'Barcha ishchilar holati (demo).',
     };
 
+    final presentCount = rows.where((p) => p.present).length;
+
     return ListView(
-      padding: const EdgeInsets.all(AppSpacing.lg),
+      padding: const EdgeInsets.fromLTRB(20, 16, 20, 24),
       children: [
-        Text(
-          hint,
-          style: textTheme.bodyMedium?.copyWith(
-            color: scheme.onSurfaceVariant,
-            height: 1.4,
+        BrandSurface(
+          radius: AppRadius.lg,
+          padding: const EdgeInsets.all(18),
+          child: Row(
+            children: [
+              Container(
+                width: 46,
+                height: 46,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(14),
+                  gradient: LinearGradient(
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                    colors: [
+                      scheme.primary,
+                      scheme.primary.withValues(alpha: 0.7),
+                    ],
+                  ),
+                  boxShadow: [
+                    BoxShadow(
+                      color: scheme.primary.withValues(alpha: 0.30),
+                      blurRadius: 14,
+                      offset: const Offset(0, 6),
+                      spreadRadius: -6,
+                    ),
+                  ],
+                ),
+                child: const Icon(
+                  Icons.how_to_reg_rounded,
+                  color: Colors.white,
+                  size: 22,
+                ),
+              ),
+              const SizedBox(width: 14),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      'Bugun ishda: $presentCount / ${rows.isEmpty ? 1 : rows.length}',
+                      style: textTheme.titleSmall?.copyWith(
+                        fontWeight: FontWeight.w800,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      hint,
+                      style: textTheme.bodySmall?.copyWith(
+                        color: scheme.onSurfaceVariant,
+                        height: 1.35,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
           ),
         ),
-        const SizedBox(height: AppSpacing.lg),
+        const SizedBox(height: 18),
         ...rows.map((p) {
-          final canToggle = role != UserRole.worker ||
-              (user != null && p.id == user.id);
-
+          final canToggle =
+              role != UserRole.worker || (user != null && p.id == user.id);
           return Padding(
-            padding: const EdgeInsets.only(bottom: AppSpacing.sm),
-            child: AppCard(
-              hoverable: false,
-              padding: const EdgeInsets.symmetric(
-                horizontal: AppSpacing.sm,
-                vertical: AppSpacing.xs,
-              ),
-              child: SwitchListTile.adaptive(
-                value: p.present,
-                activeThumbColor: scheme.primary,
-                activeTrackColor: scheme.primary.withValues(alpha: 0.35),
-                title: Text(
-                  p.name,
-                  style: textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w700),
-                ),
-                subtitle: Text(
-                  p.present
-                      ? 'Ishda${p.checkInTime != null ? ' • ${p.checkInTime}' : ''}'
-                      : 'Kelmagan',
-                  style: textTheme.bodySmall?.copyWith(
-                    color: scheme.onSurfaceVariant,
-                  ),
-                ),
-                onChanged: canToggle
-                    ? (_) =>
-                        ref.read(attendanceProvider.notifier).toggle(p.id)
-                    : null,
-              ),
+            padding: const EdgeInsets.only(bottom: 10),
+            child: BrandSwitchTile(
+              leadingIcon: Icons.person_rounded,
+              title: p.name,
+              subtitle: p.present
+                  ? 'Ishda${p.checkInTime != null ? ' • ${p.checkInTime}' : ''}'
+                  : 'Kelmagan',
+              value: p.present,
+              enabled: canToggle,
+              onChanged: canToggle
+                  ? (_) => ref.read(attendanceProvider.notifier).toggle(p.id)
+                  : null,
             ),
           );
         }),

@@ -1,15 +1,15 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../config/constants/app_constants.dart';
 import '../../../../config/routes/route_paths.dart';
-import '../../../../config/theme/app_spacing.dart';
-import '../../../../shared/widgets/atoms/app_badge.dart';
-import '../../../../shared/widgets/atoms/app_card.dart';
-import '../../../../shared/widgets/layout/auth_backdrop.dart';
+import '../../../../config/routes/app_router.dart';
+import '../../../../shared/widgets/brand/brand_backdrop.dart';
+import '../../../../shared/widgets/brand/brand_logo.dart';
 import '../providers/auth_notifier.dart';
 
 class SplashPage extends ConsumerStatefulWidget {
@@ -21,107 +21,106 @@ class SplashPage extends ConsumerStatefulWidget {
 
 class _SplashPageState extends ConsumerState<SplashPage>
     with SingleTickerProviderStateMixin {
-  late final AnimationController _intro = AnimationController(
-    vsync: this,
-    duration: const Duration(milliseconds: 900),
-  )..forward();
-
-  Timer? _splashHold;
+  late final AnimationController _ctrl;
+  Timer? _redirect;
 
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) => _scheduleSplashExit());
+    _ctrl = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 1100),
+    )..forward();
+
+    _redirect = Timer(const Duration(milliseconds: 1300), _goNext);
   }
 
-  void _scheduleSplashExit() {
-    _splashHold?.cancel();
-    _splashHold = Timer(AppConstants.splashMinDuration, () {
-      if (!mounted) return;
-
-      final auth = ref.read(authNotifierProvider);
-      if (auth.isAuthenticated) return;
-
-      if (!context.mounted) return;
+  void _goNext() {
+    if (!mounted) return;
+    final auth = ref.read(authNotifierProvider);
+    if (auth.isAuthenticated && auth.user != null) {
+      context.go(dashboardLocationForRole(auth.user!.role));
+    } else {
       context.go(AppRoutes.login);
-    });
+    }
   }
 
   @override
   void dispose() {
-    _splashHold?.cancel();
-    _intro.dispose();
+    _redirect?.cancel();
+    _ctrl.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     final scheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
 
-    return Scaffold(
-      body: AuthBackdrop(
-        child: Center(
-          child: FadeTransition(
-            opacity: CurvedAnimation(parent: _intro, curve: Curves.easeOutCubic),
-            child: ConstrainedBox(
-              constraints: const BoxConstraints(maxWidth: 420),
-              child: AppCard(
-                hoverable: false,
-                backgroundColor: scheme.surface.withValues(alpha: 0.82),
-                padding: const EdgeInsets.all(AppSpacing.xxxl),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    const AppBadge(
-                      label: 'Operations platform',
-                      icon: Icons.grid_view_rounded,
-                      tone: AppBadgeTone.primary,
+    final overlay = isDark
+        ? SystemUiOverlayStyle.light.copyWith(statusBarColor: Colors.transparent)
+        : SystemUiOverlayStyle.dark.copyWith(statusBarColor: Colors.transparent);
+
+    return AnnotatedRegion<SystemUiOverlayStyle>(
+      value: overlay,
+      child: Scaffold(
+        body: Stack(
+          fit: StackFit.expand,
+          children: [
+            const BrandBackdrop(),
+            SafeArea(
+              child: Center(
+                child: FadeTransition(
+                  opacity: CurvedAnimation(
+                    parent: _ctrl,
+                    curve: Curves.easeOut,
+                  ),
+                  child: SlideTransition(
+                    position: Tween<Offset>(
+                      begin: const Offset(0, 0.06),
+                      end: Offset.zero,
+                    ).animate(CurvedAnimation(
+                      parent: _ctrl,
+                      curve: Curves.easeOutCubic,
+                    )),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const BrandLogo(size: 104, iconSize: 48),
+                        const SizedBox(height: 28),
+                        Text(
+                          AppConstants.appName,
+                          style: textTheme.headlineMedium?.copyWith(
+                            fontWeight: FontWeight.w800,
+                            letterSpacing: -0.6,
+                            color: scheme.onSurface,
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        Text(
+                          'Tikuv ustaxonasi — jamoa va ish jarayoni',
+                          style: textTheme.bodyMedium?.copyWith(
+                            color: scheme.onSurfaceVariant,
+                            height: 1.4,
+                          ),
+                        ),
+                        const SizedBox(height: 36),
+                        SizedBox(
+                          width: 32,
+                          height: 32,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2.6,
+                            color: scheme.primary,
+                          ),
+                        ),
+                      ],
                     ),
-                    const SizedBox(height: AppSpacing.lg),
-                    Container(
-                      height: 72,
-                      width: 72,
-                      decoration: BoxDecoration(
-                        color: scheme.primaryContainer,
-                        borderRadius: BorderRadius.circular(24),
-                      ),
-                      child: Icon(
-                        Icons.auto_awesome_mosaic_rounded,
-                        size: 34,
-                        color: scheme.primary,
-                      ),
-                    ),
-                    const SizedBox(height: AppSpacing.lg),
-                    Text(
-                      AppConstants.appName,
-                      style: textTheme.headlineMedium?.copyWith(
-                        fontWeight: FontWeight.w800,
-                      ),
-                      textAlign: TextAlign.center,
-                    ),
-                    const SizedBox(height: AppSpacing.xs),
-                    Text(
-                      'Operations, production, and teams in one view.',
-                      style: textTheme.bodyMedium?.copyWith(
-                        color: scheme.onSurfaceVariant,
-                      ),
-                      textAlign: TextAlign.center,
-                    ),
-                    const SizedBox(height: AppSpacing.xl),
-                    SizedBox(
-                      width: 28,
-                      height: 28,
-                      child: CircularProgressIndicator(
-                        strokeWidth: 2.8,
-                        color: scheme.primary,
-                      ),
-                    ),
-                  ],
+                  ),
                 ),
               ),
             ),
-          ),
+          ],
         ),
       ),
     );

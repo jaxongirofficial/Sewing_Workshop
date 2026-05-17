@@ -39,7 +39,7 @@ class AuthBackdrop extends StatelessWidget {
             bottom: -120,
             child: _GlowOrb(
               size: 360,
-              color: AppColors.loginGlowSecondary,
+              color: AppColors.loginGlowSoft,
             ),
           ),
           Positioned.fill(

@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 
-import '../../../../config/theme/app_spacing.dart';
 import '../../../../core/utils/uzbek_phone_input_formatter.dart';
-import '../../data/mock/mock_accounts.dart';
+import '../../../../shared/widgets/brand/brand_primary_button.dart';
+import '../../../../shared/widgets/brand/brand_text_field.dart';
 
 class LoginForm extends StatefulWidget {
   const LoginForm({
@@ -28,9 +28,7 @@ class _LoginFormState extends State<LoginForm> {
   final _formKey = GlobalKey<FormState>();
   late final TextEditingController _phoneController;
   final _passwordController = TextEditingController();
-  bool _rememberMe = false;
-
-  static const double _pillRadius = 999;
+  bool _obscure = true;
 
   @override
   void initState() {
@@ -40,47 +38,6 @@ class _LoginFormState extends State<LoginForm> {
     );
     _phoneController.selection = TextSelection.collapsed(
       offset: _phoneController.text.length,
-    );
-  }
-
-  InputDecoration _pillDecoration(BuildContext context, {String? hint}) {
-    final scheme = Theme.of(context).colorScheme;
-
-    return InputDecoration(
-      hintText: hint,
-      hintStyle: TextStyle(
-        color: scheme.onSurfaceVariant.withValues(alpha: 0.65),
-        fontSize: 14,
-      ),
-      filled: true,
-      isDense: true,
-      fillColor: scheme.surface.withValues(alpha: 0.92),
-      contentPadding: const EdgeInsets.symmetric(
-        horizontal: AppSpacing.md,
-        vertical: 10,
-      ),
-      border: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(_pillRadius),
-        borderSide: BorderSide.none,
-      ),
-      enabledBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(_pillRadius),
-        borderSide: BorderSide(
-          color: scheme.outline.withValues(alpha: 0.55),
-        ),
-      ),
-      focusedBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(_pillRadius),
-        borderSide: BorderSide(color: scheme.primary, width: 1.8),
-      ),
-      errorBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(_pillRadius),
-        borderSide: BorderSide(color: scheme.error.withValues(alpha: 0.85)),
-      ),
-      focusedErrorBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(_pillRadius),
-        borderSide: BorderSide(color: scheme.error, width: 1.6),
-      ),
     );
   }
 
@@ -109,7 +66,8 @@ class _LoginFormState extends State<LoginForm> {
   Future<void> _submit() async {
     FocusScope.of(context).unfocus();
     if (!_formKey.currentState!.validate()) return;
-    final phone = UzbekPhoneInputFormatter.normalizeForSubmit(_phoneController.text);
+    final phone =
+        UzbekPhoneInputFormatter.normalizeForSubmit(_phoneController.text);
     await widget.onSubmit(
       phone: phone,
       password: _passwordController.text,
@@ -122,8 +80,8 @@ class _LoginFormState extends State<LoginForm> {
     final textTheme = Theme.of(context).textTheme;
 
     final labelStyle = textTheme.labelLarge?.copyWith(
-      color: scheme.onSurface.withValues(alpha: 0.88),
-      fontWeight: FontWeight.w600,
+      color: scheme.onSurface.withValues(alpha: 0.85),
+      fontWeight: FontWeight.w700,
       letterSpacing: 0.15,
     );
 
@@ -131,106 +89,66 @@ class _LoginFormState extends State<LoginForm> {
       child: Form(
         key: _formKey,
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             Text('Telefon raqam', style: labelStyle),
-            const SizedBox(height: AppSpacing.sm),
-            TextFormField(
+            const SizedBox(height: 10),
+            BrandTextField(
               controller: _phoneController,
               keyboardType: TextInputType.phone,
               textInputAction: TextInputAction.next,
               autofillHints: const [AutofillHints.telephoneNumber],
-              inputFormatters: [
-                UzbekPhoneInputFormatter(),
-              ],
+              inputFormatters: [UzbekPhoneInputFormatter()],
               validator: _validatePhone,
-              style: textTheme.bodyMedium?.copyWith(
-                color: scheme.onSurface,
-                height: 1.25,
-              ),
-              decoration: _pillDecoration(
-                context,
-                hint: UzbekPhoneInputFormatter.formatFromStoreKey(
-                  MockAccounts.ownerPhone,
-                ),
-              ),
+              prefixIcon: Icons.phone_iphone_rounded,
+              hintText: '+998 90 123 45 67',
             ),
-            const SizedBox(height: AppSpacing.lg),
+            const SizedBox(height: 18),
             Text('Parol', style: labelStyle),
-            const SizedBox(height: AppSpacing.sm),
-            TextFormField(
+            const SizedBox(height: 10),
+            BrandTextField(
               controller: _passwordController,
-              obscureText: true,
+              obscureText: _obscure,
               textInputAction: TextInputAction.done,
               autofillHints: const [AutofillHints.password],
               validator: _validatePassword,
               onFieldSubmitted: (_) => _submit(),
-              style: textTheme.bodyMedium?.copyWith(
-                color: scheme.onSurface,
-                height: 1.25,
+              prefixIcon: Icons.lock_outline_rounded,
+              hintText: 'Parolingiz',
+              suffix: IconButton(
+                onPressed: () => setState(() => _obscure = !_obscure),
+                icon: Icon(
+                  _obscure
+                      ? Icons.visibility_off_outlined
+                      : Icons.visibility_outlined,
+                  color: scheme.onSurfaceVariant,
+                ),
               ),
-              decoration: _pillDecoration(context),
-            ),
-            const SizedBox(height: AppSpacing.md),
-            Row(
-              children: [
-                SizedBox(
-                  height: 24,
-                  width: 24,
-                  child: Checkbox(
-                    value: _rememberMe,
-                    materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                    visualDensity: VisualDensity.compact,
-                    side: BorderSide(color: scheme.outline, width: 1.6),
-                    fillColor: WidgetStateProperty.resolveWith((states) {
-                      if (states.contains(WidgetState.selected)) {
-                        return scheme.primary;
-                      }
-                      return scheme.surface.withValues(alpha: 0.95);
-                    }),
-                    checkColor: scheme.onPrimary,
-                    onChanged: widget.isSubmitting
-                        ? null
-                        : (v) => setState(() => _rememberMe = v ?? false),
-                  ),
-                ),
-                const SizedBox(width: AppSpacing.sm),
-                Expanded(
-                  child: GestureDetector(
-                    onTap: widget.isSubmitting
-                        ? null
-                        : () => setState(() => _rememberMe = !_rememberMe),
-                    behavior: HitTestBehavior.opaque,
-                    child: Text(
-                      'Meni eslab qol',
-                      style: textTheme.bodyMedium?.copyWith(
-                        color: scheme.onSurfaceVariant,
-                      ),
-                    ),
-                  ),
-                ),
-              ],
             ),
             if (widget.errorText != null) ...[
-              const SizedBox(height: AppSpacing.md),
+              const SizedBox(height: 14),
               Container(
                 width: double.infinity,
                 padding: const EdgeInsets.symmetric(
-                  horizontal: AppSpacing.md,
-                  vertical: AppSpacing.sm + 2,
+                  horizontal: 14,
+                  vertical: 12,
                 ),
                 decoration: BoxDecoration(
                   color: scheme.error.withValues(alpha: 0.09),
                   borderRadius: BorderRadius.circular(14),
                   border: Border.all(
-                    color: scheme.error.withValues(alpha: 0.22),
+                    color: scheme.error.withValues(alpha: 0.28),
                   ),
                 ),
                 child: Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Icon(Icons.info_outline_rounded, size: 18, color: scheme.error),
-                    const SizedBox(width: AppSpacing.sm),
+                    Icon(
+                      Icons.info_outline_rounded,
+                      size: 18,
+                      color: scheme.error,
+                    ),
+                    const SizedBox(width: 10),
                     Expanded(
                       child: Text(
                         widget.errorText!,
@@ -245,105 +163,12 @@ class _LoginFormState extends State<LoginForm> {
                 ),
               ),
             ],
-            const SizedBox(height: AppSpacing.xl),
-            DecoratedBox(
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(18),
-                gradient: LinearGradient(
-                  colors: [
-                    scheme.primary,
-                    Color.lerp(scheme.primary, scheme.secondary, 0.42)!,
-                  ],
-                  begin: Alignment.centerLeft,
-                  end: Alignment.centerRight,
-                ),
-                boxShadow: [
-                  BoxShadow(
-                    color: scheme.primary.withValues(alpha: 0.42),
-                    blurRadius: 22,
-                    offset: const Offset(0, 12),
-                    spreadRadius: -6,
-                  ),
-                ],
-              ),
-              child: Material(
-                color: Colors.transparent,
-                child: InkWell(
-                  onTap: widget.isSubmitting ? null : _submit,
-                  borderRadius: BorderRadius.circular(18),
-                  splashColor: Colors.white.withValues(alpha: 0.18),
-                  highlightColor: Colors.white.withValues(alpha: 0.08),
-                  child: SizedBox(
-                    height: 48,
-                    width: double.infinity,
-                    child: Center(
-                      child: widget.isSubmitting
-                          ? SizedBox(
-                              height: 22,
-                              width: 22,
-                              child: CircularProgressIndicator(
-                                strokeWidth: 2.6,
-                                color: scheme.onPrimary,
-                              ),
-                            )
-                          : Text(
-                              'Kirish',
-                              style: textTheme.titleMedium?.copyWith(
-                                color: scheme.onPrimary,
-                                fontWeight: FontWeight.w700,
-                                letterSpacing: 0.2,
-                              ),
-                            ),
-                    ),
-                  ),
-                ),
-              ),
-            ),
-            const SizedBox(height: AppSpacing.xxl),
-            Container(
-              width: double.infinity,
-              padding: const EdgeInsets.all(AppSpacing.md),
-              decoration: BoxDecoration(
-                color: scheme.surfaceContainerHighest.withValues(alpha: 0.55),
-                borderRadius: BorderRadius.circular(16),
-                border: Border.all(
-                  color: scheme.outlineVariant.withValues(alpha: 0.65),
-                ),
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    children: [
-                      Icon(
-                        Icons.science_outlined,
-                        size: 16,
-                        color: scheme.primary,
-                      ),
-                      const SizedBox(width: AppSpacing.xs),
-                      Text(
-                        'Sinov akkauntlari',
-                        style: textTheme.labelMedium?.copyWith(
-                          color: scheme.onSurface.withValues(alpha: 0.72),
-                          fontWeight: FontWeight.w700,
-                          letterSpacing: 0.35,
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: AppSpacing.sm),
-                  Text(
-                    'Egasi · ${UzbekPhoneInputFormatter.formatFromStoreKey(MockAccounts.ownerPhone)}\n'
-                    'Menejer · ${UzbekPhoneInputFormatter.formatFromStoreKey(MockAccounts.managerPhone)}\n'
-                    'Ishchi · ${UzbekPhoneInputFormatter.formatFromStoreKey(MockAccounts.workerPhone)}\n'
-                    'Parol: owner123 · manager123 · worker123',
-                    style: textTheme.bodySmall?.copyWith(
-                      color: scheme.onSurfaceVariant,
-                      height: 1.55,
-                    ),
-                  ),
-                ],
-              ),
+            const SizedBox(height: 22),
+            BrandPrimaryButton(
+              label: 'Kirish',
+              icon: Icons.arrow_forward_rounded,
+              loading: widget.isSubmitting,
+              onPressed: widget.isSubmitting ? null : _submit,
             ),
           ],
         ),
