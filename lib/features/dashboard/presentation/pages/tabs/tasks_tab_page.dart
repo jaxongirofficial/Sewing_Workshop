@@ -3,12 +3,19 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../../config/theme/app_radius.dart';
 import '../../../../../core/enums/user_role.dart';
+import '../../../../../l10n/s.dart';
 import '../../../../../shared/widgets/brand/brand_primary_button.dart';
 import '../../../../../shared/widgets/brand/brand_surface.dart';
 import '../../../../../shared/widgets/brand/brand_text_field.dart';
 import '../../../../auth/presentation/providers/auth_notifier.dart';
 import '../../models/workshop_mock_models.dart';
 import '../../providers/workshop_mock_providers.dart';
+
+String _localizedTaskTitle(WorkshopTaskItem task, S s) => switch (task.id) {
+      't-1' => s.seedTaskDresses,
+      't-2' => s.seedTaskQc,
+      _ => task.title,
+    };
 
 class TasksTabPage extends ConsumerStatefulWidget {
   const TasksTabPage({super.key, required this.role});
@@ -37,6 +44,7 @@ class _TasksTabPageState extends ConsumerState<TasksTabPage> {
     final scheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    final s = S.of(context);
     final user = ref.watch(authNotifierProvider).user;
     final people = ref.watch(attendanceProvider);
     final tasks = ref.watch(tasksProvider);
@@ -69,7 +77,7 @@ class _TasksTabPageState extends ConsumerState<TasksTabPage> {
                     ),
                     const SizedBox(width: 10),
                     Text(
-                      'Yangi topshiriq',
+                      s.newTask,
                       style: textTheme.titleMedium?.copyWith(
                         fontWeight: FontWeight.w800,
                         letterSpacing: -0.3,
@@ -80,7 +88,7 @@ class _TasksTabPageState extends ConsumerState<TasksTabPage> {
                 const SizedBox(height: 18),
                 BrandTextField(
                   controller: _titleCtrl,
-                  hintText: 'Masalan: A liniya — 80 ta shim tikish',
+                  hintText: s.taskInputHint,
                   prefixIcon: Icons.edit_note_rounded,
                   textCapitalization: TextCapitalization.sentences,
                 ),
@@ -117,7 +125,7 @@ class _TasksTabPageState extends ConsumerState<TasksTabPage> {
                                 ? _assigneeId
                                 : null,
                             hint: Text(
-                              'Kimga biriktirish',
+                              s.assignTo,
                               style: TextStyle(
                                 color: scheme.onSurfaceVariant
                                     .withValues(alpha: 0.7),
@@ -150,7 +158,7 @@ class _TasksTabPageState extends ConsumerState<TasksTabPage> {
                 ),
                 const SizedBox(height: 18),
                 BrandPrimaryButton(
-                  label: 'Topshiriq berish',
+                  label: s.assignTask,
                   icon: Icons.send_rounded,
                   onPressed: people.isEmpty || _assigneeId == null
                       ? null
@@ -177,7 +185,7 @@ class _TasksTabPageState extends ConsumerState<TasksTabPage> {
           child: Row(
             children: [
               Text(
-                _canAssign ? 'Topshiriqlar' : 'Sizning ishlaringiz',
+                _canAssign ? s.tasks : s.yourTasks,
                 style: textTheme.titleMedium?.copyWith(
                   fontWeight: FontWeight.w800,
                 ),
@@ -215,7 +223,7 @@ class _TasksTabPageState extends ConsumerState<TasksTabPage> {
                   ),
                   const SizedBox(height: 12),
                   Text(
-                    'Hozircha topshiriq yo\'q',
+                    s.noTasksYet,
                     style: textTheme.titleSmall?.copyWith(
                       color: scheme.onSurfaceVariant,
                       fontWeight: FontWeight.w700,
@@ -264,7 +272,7 @@ class _TasksTabPageState extends ConsumerState<TasksTabPage> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            t.title,
+                            _localizedTaskTitle(t, s),
                             style: textTheme.titleSmall?.copyWith(
                               fontWeight: FontWeight.w800,
                             ),

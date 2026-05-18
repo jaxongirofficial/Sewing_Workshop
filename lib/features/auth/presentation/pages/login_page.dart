@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../shared/widgets/brand/brand_backdrop.dart';
 import '../../../../shared/widgets/brand/brand_logo.dart';
 import '../../../../shared/widgets/brand/brand_surface.dart';
+import '../../../../l10n/s.dart';
 import '../providers/auth_notifier.dart';
 import '../widgets/login_form.dart';
 
@@ -18,6 +19,12 @@ class LoginPage extends ConsumerWidget {
     final scheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    final s = S.of(context);
+    final errorText = switch (auth.error) {
+      AuthFailure.invalidCredentials => s.invalidCredentials,
+      AuthFailure.generic => s.genericError,
+      null => null,
+    };
 
     final overlay = isDark
         ? SystemUiOverlayStyle.light.copyWith(statusBarColor: Colors.transparent)
@@ -56,7 +63,7 @@ class LoginPage extends ConsumerWidget {
                                   const BrandLogo(),
                                   const SizedBox(height: 22),
                                   Text(
-                                    'Xush kelibsiz',
+                                    s.welcomeTitle,
                                     textAlign: TextAlign.center,
                                     style: textTheme.headlineSmall?.copyWith(
                                       fontWeight: FontWeight.w800,
@@ -66,7 +73,7 @@ class LoginPage extends ConsumerWidget {
                                   ),
                                   const SizedBox(height: 6),
                                   Text(
-                                    'Davom etish uchun akkauntingizga kiring',
+                                    s.welcomeSubtitle,
                                     textAlign: TextAlign.center,
                                     style: textTheme.bodyMedium?.copyWith(
                                       color: scheme.onSurfaceVariant,
@@ -86,7 +93,7 @@ class LoginPage extends ConsumerWidget {
                                 ),
                                 child: LoginForm(
                                   isSubmitting: auth.isLoading,
-                                  errorText: auth.errorMessage,
+                                  errorText: errorText,
                                   onSubmit: ({
                                     required phone,
                                     required password,

@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../../config/theme/app_radius.dart';
 import '../../../../../core/enums/user_role.dart';
+import '../../../../../l10n/s.dart';
 import '../../../../../shared/widgets/brand/brand_surface.dart';
 import '../../../../../shared/widgets/brand/brand_switch_tile.dart';
 import '../../../../auth/presentation/providers/auth_notifier.dart';
@@ -19,6 +20,7 @@ class AttendanceTabPage extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final scheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
+    final s = S.of(context);
     final user = ref.watch(authNotifierProvider).user;
     final list = ref.watch(attendanceProvider);
 
@@ -30,11 +32,9 @@ class AttendanceTabPage extends ConsumerWidget {
     }
 
     final hint = switch (role) {
-      UserRole.worker =>
-        'Faqat o\'zingizni belgilashingiz mumkin.',
-      UserRole.manager =>
-        'Liniya ishchilari — ishda yoki yo\'qligini belgilang.',
-      UserRole.owner => 'Barcha ishchilar holati (demo).',
+      UserRole.worker => s.attendanceWorkerHint,
+      UserRole.manager => s.attendanceManagerHint,
+      UserRole.owner => s.attendanceOwnerHint,
     };
 
     final presentCount = rows.where((p) => p.present).length;
@@ -82,7 +82,10 @@ class AttendanceTabPage extends ConsumerWidget {
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     Text(
-                      'Bugun ishda: $presentCount / ${rows.isEmpty ? 1 : rows.length}',
+                      s.todayAtWorkSummary(
+                        presentCount,
+                        rows.isEmpty ? 1 : rows.length,
+                      ),
                       style: textTheme.titleSmall?.copyWith(
                         fontWeight: FontWeight.w800,
                       ),
@@ -111,8 +114,10 @@ class AttendanceTabPage extends ConsumerWidget {
               leadingIcon: Icons.person_rounded,
               title: p.name,
               subtitle: p.present
-                  ? 'Ishda${p.checkInTime != null ? ' • ${p.checkInTime}' : ''}'
-                  : 'Kelmagan',
+                  ? (p.checkInTime != null
+                      ? s.atWorkWithTime(p.checkInTime!)
+                      : s.atWork)
+                  : s.absent,
               value: p.present,
               enabled: canToggle,
               onChanged: canToggle

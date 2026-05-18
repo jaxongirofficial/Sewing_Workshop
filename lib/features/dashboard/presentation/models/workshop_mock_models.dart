@@ -48,13 +48,6 @@ enum WarehouseCategory {
   material,
   accessory,
   other;
-
-  String get uzLabel => switch (this) {
-        WarehouseCategory.clothing => 'Kiyim',
-        WarehouseCategory.material => 'Material',
-        WarehouseCategory.accessory => 'Aksessuar',
-        WarehouseCategory.other => 'Boshqa',
-      };
 }
 
 /// Ombordagi bitta mahsulot yozuvi.

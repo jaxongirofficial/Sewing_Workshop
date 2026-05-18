@@ -4,10 +4,39 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../../config/theme/app_colors.dart';
 import '../../../../../config/theme/app_radius.dart';
 import '../../../../../core/enums/user_role.dart';
+import '../../../../../l10n/s.dart';
 import '../../models/workshop_mock_models.dart';
 import '../../providers/workshop_mock_providers.dart';
 import '../../../../../shared/widgets/brand/brand_surface.dart';
 import '../../../../../shared/widgets/brand/brand_text_field.dart';
+
+String _categoryLabel(WarehouseCategory category, S s) => switch (category) {
+  WarehouseCategory.clothing => s.categoryClothing,
+  WarehouseCategory.material => s.categoryMaterial,
+  WarehouseCategory.accessory => s.categoryAccessory,
+  WarehouseCategory.other => s.categoryOther,
+};
+
+String _warehouseItemName(WarehouseItem item, S s) => switch (item.id) {
+  'w-1' => s.productPants,
+  'w-2' => s.productDress,
+  'w-3' => s.productSleeve,
+  'w-4' => s.productSkirt,
+  'w-5' => s.productJacket,
+  'w-6' => s.productBag,
+  'w-7' => s.productBelt,
+  'w-8' => s.productBlueFabric,
+  'w-9' => s.productWhiteThread,
+  'w-10' => s.productButton,
+  _ => item.name,
+};
+
+String _unitLabel(String unit, S s) => switch (unit) {
+  'ta' => s.unitPiece,
+  'metr' => s.unitMeter,
+  'dona' => s.unitItem,
+  _ => unit,
+};
 
 class WarehouseTabPage extends ConsumerStatefulWidget {
   const WarehouseTabPage({super.key, required this.role});
@@ -78,19 +107,22 @@ class _WarehouseTabPageState extends ConsumerState<WarehouseTabPage> {
 
   Future<void> _confirmDelete(BuildContext context, WarehouseItem item) async {
     final scheme = Theme.of(context).colorScheme;
+    final s = S.of(context);
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(AppRadius.xl),
         ),
-        title: const Text("O'chirishni tasdiqlang"),
-        content: Text('"${item.name}" mahsulotini ombordan o\'chirmoqchimisiz?'),
+        title: Text(s.deleteConfirmTitle),
+        content: Text(
+          s.deleteWarehouseItemMessage(_warehouseItemName(item, s)),
+        ),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(ctx).pop(false),
             child: Text(
-              'Bekor',
+              s.cancel,
               style: TextStyle(color: scheme.onSurfaceVariant),
             ),
           ),
@@ -103,7 +135,7 @@ class _WarehouseTabPageState extends ConsumerState<WarehouseTabPage> {
               ),
             ),
             onPressed: () => Navigator.of(ctx).pop(true),
-            child: const Text("O'chirish"),
+            child: Text(s.delete),
           ),
         ],
       ),
@@ -143,13 +175,14 @@ class _SummaryRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final s = S.of(context);
     return Row(
       children: [
         Expanded(
           child: _SumCard(
             icon: Icons.inventory_2_rounded,
             value: '$totalItems',
-            label: 'Jami dona',
+            label: s.totalPieces,
             color: AppColors.brand,
           ),
         ),
@@ -158,7 +191,7 @@ class _SummaryRow extends StatelessWidget {
           child: _SumCard(
             icon: Icons.category_rounded,
             value: '$productTypes',
-            label: 'Mahsulot turi',
+            label: s.productTypes,
             color: AppColors.success,
           ),
         ),
@@ -167,7 +200,7 @@ class _SummaryRow extends StatelessWidget {
           child: _SumCard(
             icon: Icons.layers_rounded,
             value: '$categories',
-            label: 'Kategoriya',
+            label: s.category,
             color: AppColors.warning,
           ),
         ),
@@ -250,15 +283,16 @@ class _CategoryFilter extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final s = S.of(context);
     final chips = <Widget>[
       _Chip(
-        label: 'Barchasi',
+        label: s.allCategories,
         selected: selected == null,
         onTap: () => onSelect(null),
       ),
       for (final c in WarehouseCategory.values)
         _Chip(
-          label: c.uzLabel,
+          label: _categoryLabel(c, s),
           selected: selected == c,
           onTap: () => onSelect(c == selected ? null : c),
         ),
@@ -291,6 +325,7 @@ class _Chip extends StatelessWidget {
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    final s = S.of(context);
 
     return GestureDetector(
       onTap: onTap,
@@ -307,9 +342,7 @@ class _Chip extends StatelessWidget {
                   ],
                 )
               : null,
-          color: selected
-              ? null
-              : (isDark ? AppColors.darkCard : Colors.white),
+          color: selected ? null : (isDark ? AppColors.darkCard : Colors.white),
           border: Border.all(
             color: selected
                 ? scheme.primary
@@ -353,6 +386,7 @@ class _AddButton extends StatelessWidget {
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    final s = S.of(context); // <-- SHU QATORNI QO‘SHING
 
     return Material(
       color: Colors.transparent,
@@ -366,8 +400,7 @@ class _AddButton extends StatelessWidget {
             gradient: LinearGradient(
               colors: [
                 scheme.primary,
-                Color.lerp(
-                    scheme.primary, Colors.black, isDark ? 0.12 : 0.22)!,
+                Color.lerp(scheme.primary, Colors.black, isDark ? 0.12 : 0.22)!,
               ],
             ),
             boxShadow: [
@@ -396,9 +429,9 @@ class _AddButton extends StatelessWidget {
                 ),
               ),
               const SizedBox(width: 10),
-              const Text(
-                "Mahsulot qo'shish",
-                style: TextStyle(
+              Text(
+                s.addProduct,
+                style: const TextStyle(
                   color: Colors.white,
                   fontWeight: FontWeight.w800,
                   fontSize: 15,
@@ -431,23 +464,24 @@ class _ProductCard extends StatelessWidget {
   final VoidCallback onDelete;
 
   Color _categoryColor(WarehouseCategory c) => switch (c) {
-        WarehouseCategory.clothing => AppColors.brand,
-        WarehouseCategory.material => AppColors.success,
-        WarehouseCategory.accessory => AppColors.warning,
-        WarehouseCategory.other => AppColors.slate,
-      };
+    WarehouseCategory.clothing => AppColors.brand,
+    WarehouseCategory.material => AppColors.success,
+    WarehouseCategory.accessory => AppColors.warning,
+    WarehouseCategory.other => AppColors.slate,
+  };
 
   IconData _categoryIcon(WarehouseCategory c) => switch (c) {
-        WarehouseCategory.clothing => Icons.checkroom_rounded,
-        WarehouseCategory.material => Icons.layers_rounded,
-        WarehouseCategory.accessory => Icons.diamond_rounded,
-        WarehouseCategory.other => Icons.inventory_2_rounded,
-      };
+    WarehouseCategory.clothing => Icons.checkroom_rounded,
+    WarehouseCategory.material => Icons.layers_rounded,
+    WarehouseCategory.accessory => Icons.diamond_rounded,
+    WarehouseCategory.other => Icons.inventory_2_rounded,
+  };
 
   @override
   Widget build(BuildContext context) {
     final textTheme = Theme.of(context).textTheme;
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    final s = S.of(context);
     final catColor = _categoryColor(item.category);
     final catIcon = _categoryIcon(item.category);
     final isLow = item.quantity <= 5;
@@ -483,7 +517,7 @@ class _ProductCard extends StatelessWidget {
               mainAxisSize: MainAxisSize.min,
               children: [
                 Text(
-                  item.name,
+                  _warehouseItemName(item, s),
                   style: textTheme.titleSmall?.copyWith(
                     fontWeight: FontWeight.w800,
                     letterSpacing: -0.2,
@@ -494,14 +528,15 @@ class _ProductCard extends StatelessWidget {
                   children: [
                     Container(
                       padding: const EdgeInsets.symmetric(
-                          horizontal: 7, vertical: 2),
+                        horizontal: 7,
+                        vertical: 2,
+                      ),
                       decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(6),
-                        color: catColor.withValues(
-                            alpha: isDark ? 0.22 : 0.12),
+                        color: catColor.withValues(alpha: isDark ? 0.22 : 0.12),
                       ),
                       child: Text(
-                        item.category.uzLabel,
+                        _categoryLabel(item.category, s),
                         style: TextStyle(
                           fontSize: 10,
                           fontWeight: FontWeight.w700,
@@ -514,14 +549,17 @@ class _ProductCard extends StatelessWidget {
                       const SizedBox(width: 6),
                       Container(
                         padding: const EdgeInsets.symmetric(
-                            horizontal: 7, vertical: 2),
+                          horizontal: 7,
+                          vertical: 2,
+                        ),
                         decoration: BoxDecoration(
                           borderRadius: BorderRadius.circular(6),
-                          color: AppColors.danger
-                              .withValues(alpha: isDark ? 0.22 : 0.12),
+                          color: AppColors.danger.withValues(
+                            alpha: isDark ? 0.22 : 0.12,
+                          ),
                         ),
-                        child: const Text(
-                          'Kam',
+                        child: Text(
+                          s.low,
                           style: TextStyle(
                             fontSize: 10,
                             fontWeight: FontWeight.w700,
@@ -542,14 +580,17 @@ class _ProductCard extends StatelessWidget {
           if (canEdit)
             _QuantityControl(
               value: item.quantity,
-              unit: item.unit,
+              unit: _unitLabel(item.unit, s),
               onIncrement: onIncrement,
               onDecrement: onDecrement,
               isLow: isLow,
             )
           else
             _QuantityBadge(
-                quantity: item.quantity, unit: item.unit, isLow: isLow),
+              quantity: item.quantity,
+              unit: _unitLabel(item.unit, s),
+              isLow: isLow,
+            ),
 
           if (canEdit) ...[
             const SizedBox(width: 6),
@@ -612,11 +653,7 @@ class _QuantityControl extends StatelessWidget {
           ],
         ),
         const SizedBox(width: 6),
-        _RoundBtn(
-          icon: Icons.add_rounded,
-          onTap: onIncrement,
-          active: true,
-        ),
+        _RoundBtn(icon: Icons.add_rounded, onTap: onIncrement, active: true),
       ],
     );
   }
@@ -739,6 +776,7 @@ class _EmptyState extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
+    final s = S.of(context);
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 48),
       child: Column(
@@ -753,9 +791,7 @@ class _EmptyState extends StatelessWidget {
           ),
           const SizedBox(height: 16),
           Text(
-            filtered
-                ? 'Bu kategoriyada mahsulot yoq'
-                : 'Ombor bosh',
+            filtered ? s.filteredEmptyTitle : s.warehouseEmptyTitle,
             style: TextStyle(
               fontSize: 15,
               fontWeight: FontWeight.w700,
@@ -764,9 +800,7 @@ class _EmptyState extends StatelessWidget {
           ),
           const SizedBox(height: 6),
           Text(
-            filtered
-                ? 'Boshqa kategoriyani tanlang'
-                : "Mahsulot qo'shish tugmasini bosing",
+            filtered ? s.filteredEmptyHint : s.warehouseEmptyHint,
             style: TextStyle(
               fontSize: 13,
               color: scheme.onSurfaceVariant.withValues(alpha: 0.7),
@@ -792,7 +826,7 @@ class _AddItemSheetState extends ConsumerState<_AddItemSheet> {
   final _formKey = GlobalKey<FormState>();
   final _nameCtrl = TextEditingController();
   final _qtyCtrl = TextEditingController(text: '1');
-  final _unitCtrl = TextEditingController(text: 'ta');
+  final _unitCtrl = TextEditingController();
   WarehouseCategory _cat = WarehouseCategory.clothing;
 
   @override
@@ -822,6 +856,7 @@ class _AddItemSheetState extends ConsumerState<_AddItemSheet> {
     final textTheme = Theme.of(context).textTheme;
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final viewInsets = MediaQuery.viewInsetsOf(context);
+    final s = S.of(context);
 
     return Padding(
       padding: EdgeInsets.fromLTRB(16, 8, 16, viewInsets.bottom + 16),
@@ -834,8 +869,7 @@ class _AddItemSheetState extends ConsumerState<_AddItemSheet> {
           ),
           boxShadow: [
             BoxShadow(
-              color:
-                  Colors.black.withValues(alpha: isDark ? 0.50 : 0.10),
+              color: Colors.black.withValues(alpha: isDark ? 0.50 : 0.10),
               blurRadius: 30,
               offset: const Offset(0, 14),
               spreadRadius: -10,
@@ -862,7 +896,7 @@ class _AddItemSheetState extends ConsumerState<_AddItemSheet> {
                 ),
                 const SizedBox(height: 16),
                 Text(
-                  'Yangi mahsulot',
+                  s.newProduct,
                   style: textTheme.titleMedium?.copyWith(
                     fontWeight: FontWeight.w800,
                     letterSpacing: -0.3,
@@ -872,10 +906,10 @@ class _AddItemSheetState extends ConsumerState<_AddItemSheet> {
 
                 BrandTextField(
                   controller: _nameCtrl,
-                  hintText: "Mahsulot nomi (Shim, Ko'ylak...)",
+                  hintText: s.productNameHint,
                   prefixIcon: Icons.inventory_2_outlined,
                   validator: (v) =>
-                      (v == null || v.trim().isEmpty) ? 'Nom kiriting' : null,
+                      (v == null || v.trim().isEmpty) ? s.nameRequired : null,
                 ),
                 const SizedBox(height: 12),
 
@@ -884,12 +918,12 @@ class _AddItemSheetState extends ConsumerState<_AddItemSheet> {
                     Expanded(
                       child: BrandTextField(
                         controller: _qtyCtrl,
-                        hintText: 'Miqdor',
+                        hintText: s.quantityHint,
                         prefixIcon: Icons.numbers_rounded,
                         keyboardType: TextInputType.number,
                         validator: (v) {
                           final n = int.tryParse(v ?? '');
-                          if (n == null || n < 0) return 'Raqam kiriting';
+                          if (n == null || n < 0) return s.numberRequired;
                           return null;
                         },
                       ),
@@ -898,7 +932,7 @@ class _AddItemSheetState extends ConsumerState<_AddItemSheet> {
                     Expanded(
                       child: BrandTextField(
                         controller: _unitCtrl,
-                        hintText: 'ta, metr, kg...',
+                        hintText: s.unitHint,
                         prefixIcon: Icons.straighten_rounded,
                       ),
                     ),
@@ -907,7 +941,7 @@ class _AddItemSheetState extends ConsumerState<_AddItemSheet> {
                 const SizedBox(height: 12),
 
                 Text(
-                  'Kategoriya',
+                  s.category,
                   style: textTheme.labelMedium?.copyWith(
                     fontWeight: FontWeight.w700,
                     color: scheme.onSurfaceVariant,
@@ -920,7 +954,7 @@ class _AddItemSheetState extends ConsumerState<_AddItemSheet> {
                   children: [
                     for (final c in WarehouseCategory.values)
                       _SheetChip(
-                        label: c.uzLabel,
+                        label: _categoryLabel(c, s),
                         selected: _cat == c,
                         onTap: () => setState(() => _cat = c),
                       ),
@@ -940,8 +974,11 @@ class _AddItemSheetState extends ConsumerState<_AddItemSheet> {
                         gradient: LinearGradient(
                           colors: [
                             scheme.primary,
-                            Color.lerp(scheme.primary, Colors.black,
-                                isDark ? 0.10 : 0.22)!,
+                            Color.lerp(
+                              scheme.primary,
+                              Colors.black,
+                              isDark ? 0.10 : 0.22,
+                            )!,
                           ],
                         ),
                         boxShadow: [
@@ -954,8 +991,8 @@ class _AddItemSheetState extends ConsumerState<_AddItemSheet> {
                         ],
                       ),
                       alignment: Alignment.center,
-                      child: const Text(
-                        'Saqlash',
+                      child: Text(
+                        s.save,
                         style: TextStyle(
                           color: Colors.white,
                           fontWeight: FontWeight.w800,

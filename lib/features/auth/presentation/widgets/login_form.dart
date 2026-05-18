@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../../core/utils/uzbek_phone_input_formatter.dart';
+import '../../../../l10n/s.dart';
 import '../../../../shared/widgets/brand/brand_primary_button.dart';
 import '../../../../shared/widgets/brand/brand_text_field.dart';
 
@@ -52,14 +53,15 @@ class _LoginFormState extends State<LoginForm> {
     final normalized = UzbekPhoneInputFormatter.normalizeForSubmit(value ?? '');
     final digits = normalized.replaceAll(RegExp(r'\D'), '');
     if (digits.length != 12 || !digits.startsWith('998')) {
-      return 'To\'liq telefon: +998 XX XXX XX XX';
+      return S.of(context).phoneValidation;
     }
     return null;
   }
 
   String? _validatePassword(String? value) {
-    if (value == null || value.isEmpty) return 'Parolni kiriting';
-    if (value.length < 6) return 'Parol kamida 6 ta belgi bo\'lishi kerak';
+    final s = S.of(context);
+    if (value == null || value.isEmpty) return s.passwordRequired;
+    if (value.length < 6) return s.passwordMinLength;
     return null;
   }
 
@@ -78,6 +80,7 @@ class _LoginFormState extends State<LoginForm> {
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
+    final s = S.of(context);
 
     final labelStyle = textTheme.labelLarge?.copyWith(
       color: scheme.onSurface.withValues(alpha: 0.85),
@@ -91,7 +94,7 @@ class _LoginFormState extends State<LoginForm> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            Text('Telefon raqam', style: labelStyle),
+            Text(s.phoneLabel, style: labelStyle),
             const SizedBox(height: 10),
             BrandTextField(
               controller: _phoneController,
@@ -104,7 +107,7 @@ class _LoginFormState extends State<LoginForm> {
               hintText: '+998 90 123 45 67',
             ),
             const SizedBox(height: 18),
-            Text('Parol', style: labelStyle),
+            Text(s.passwordLabel, style: labelStyle),
             const SizedBox(height: 10),
             BrandTextField(
               controller: _passwordController,
@@ -114,7 +117,7 @@ class _LoginFormState extends State<LoginForm> {
               validator: _validatePassword,
               onFieldSubmitted: (_) => _submit(),
               prefixIcon: Icons.lock_outline_rounded,
-              hintText: 'Parolingiz',
+              hintText: s.passwordHint,
               suffix: IconButton(
                 onPressed: () => setState(() => _obscure = !_obscure),
                 icon: Icon(
@@ -165,7 +168,7 @@ class _LoginFormState extends State<LoginForm> {
             ],
             const SizedBox(height: 22),
             BrandPrimaryButton(
-              label: 'Kirish',
+              label: s.signIn,
               icon: Icons.arrow_forward_rounded,
               loading: widget.isSubmitting,
               onPressed: widget.isSubmitting ? null : _submit,

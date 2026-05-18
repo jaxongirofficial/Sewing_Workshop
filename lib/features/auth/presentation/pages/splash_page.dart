@@ -5,9 +5,9 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../../../config/constants/app_constants.dart';
 import '../../../../config/routes/route_paths.dart';
 import '../../../../config/routes/app_router.dart';
+import '../../../../l10n/s.dart';
 import '../../../../shared/widgets/brand/brand_backdrop.dart';
 import '../../../../shared/widgets/brand/brand_logo.dart';
 import '../providers/auth_notifier.dart';
@@ -57,6 +57,7 @@ class _SplashPageState extends ConsumerState<SplashPage>
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final scheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
+    final s = S.of(context);
 
     final overlay = isDark
         ? SystemUiOverlayStyle.light.copyWith(statusBarColor: Colors.transparent)
@@ -90,7 +91,7 @@ class _SplashPageState extends ConsumerState<SplashPage>
                         const BrandLogo(size: 104, iconSize: 48),
                         const SizedBox(height: 28),
                         Text(
-                          AppConstants.appName,
+                          s.appName,
                           style: textTheme.headlineMedium?.copyWith(
                             fontWeight: FontWeight.w800,
                             letterSpacing: -0.6,
@@ -99,7 +100,7 @@ class _SplashPageState extends ConsumerState<SplashPage>
                         ),
                         const SizedBox(height: 8),
                         Text(
-                          'Tikuv ustaxonasi — jamoa va ish jarayoni',
+                          s.appTagline,
                           style: textTheme.bodyMedium?.copyWith(
                             color: scheme.onSurfaceVariant,
                             height: 1.4,

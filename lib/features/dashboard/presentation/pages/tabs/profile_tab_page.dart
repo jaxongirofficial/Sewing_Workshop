@@ -1,11 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../../../config/l10n/locale_provider.dart';
 import '../../../../../config/theme/app_colors.dart';
 import '../../../../../config/theme/app_radius.dart';
 import '../../../../../config/theme/theme_mode_provider.dart';
 import '../../../../../core/enums/user_role.dart';
+import '../../../../../l10n/s.dart';
 import '../../../../auth/presentation/providers/auth_notifier.dart';
+import '../../models/workshop_mock_models.dart';
 import '../../providers/workshop_mock_providers.dart';
 
 class ProfileTabPage extends ConsumerWidget {
@@ -13,10 +16,22 @@ class ProfileTabPage extends ConsumerWidget {
 
   final UserRole role;
 
-  String _roleUz(UserRole r) => switch (r) {
-        UserRole.owner => 'Egasi',
-        UserRole.manager => 'Menejer',
-        UserRole.worker => 'Ishchi',
+  String _roleLabel(S s, UserRole r) => switch (r) {
+        UserRole.owner => s.roleOwner,
+        UserRole.manager => s.roleManager,
+        UserRole.worker => s.roleWorker,
+      };
+
+  String _languageLabel(S s, Locale locale) => switch (locale.languageCode) {
+        'en' => s.languageEnglish,
+        'ru' => s.languageRussian,
+        _ => s.languageUzbek,
+      };
+
+  String _themeLabel(S s, ThemeMode mode) => switch (mode) {
+        ThemeMode.light => s.themeLight,
+        ThemeMode.dark => s.themeDark,
+        ThemeMode.system => s.themeSystem,
       };
 
   Future<void> _showThemePicker(
@@ -27,6 +42,7 @@ class ProfileTabPage extends ConsumerWidget {
     final scheme = Theme.of(context).colorScheme;
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final textTheme = Theme.of(context).textTheme;
+    final s = S.of(context);
 
     await showModalBottomSheet<void>(
       context: context,
@@ -87,7 +103,7 @@ class ProfileTabPage extends ConsumerWidget {
                   ),
                   const SizedBox(height: 16),
                   Text(
-                    'Tema rejimi',
+                    s.chooseTheme,
                     style: textTheme.titleMedium?.copyWith(
                       fontWeight: FontWeight.w800,
                       letterSpacing: -0.3,
@@ -95,7 +111,7 @@ class ProfileTabPage extends ConsumerWidget {
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    'Ilova ko‘rinishini tanlang',
+                    s.chooseThemeHint,
                     style: textTheme.bodySmall?.copyWith(
                       color: scheme.onSurfaceVariant,
                     ),
@@ -146,24 +162,157 @@ class ProfileTabPage extends ConsumerWidget {
     );
   }
 
+  Future<void> _showLanguagePicker(
+    BuildContext context,
+    WidgetRef ref,
+    Locale current,
+  ) async {
+    final scheme = Theme.of(context).colorScheme;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final textTheme = Theme.of(context).textTheme;
+    final s = S.of(context);
+
+    await showModalBottomSheet<void>(
+      context: context,
+      backgroundColor: Colors.transparent,
+      isScrollControlled: true,
+      useSafeArea: true,
+      builder: (sheetCtx) {
+        final viewInsets = MediaQuery.viewInsetsOf(sheetCtx);
+
+        return LayoutBuilder(
+          builder: (context, constraints) {
+            return Padding(
+              padding: EdgeInsets.fromLTRB(
+                16,
+                8,
+                16,
+                viewInsets.bottom + 16,
+              ),
+              child: ConstrainedBox(
+                constraints: BoxConstraints(maxHeight: constraints.maxHeight),
+                child: SingleChildScrollView(
+                  physics: const ClampingScrollPhysics(),
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: isDark ? AppColors.darkCard : Colors.white,
+                      borderRadius: BorderRadius.circular(AppRadius.xl),
+                      border: Border.all(
+                        color: isDark
+                            ? AppColors.darkBorder
+                            : const Color(0xFFE6EBF4),
+                      ),
+                      boxShadow: [
+                        BoxShadow(
+                          color: isDark
+                              ? Colors.black.withValues(alpha: 0.55)
+                              : AppColors.shadow.withValues(alpha: 0.10),
+                          blurRadius: 30,
+                          offset: const Offset(0, 14),
+                          spreadRadius: -10,
+                        ),
+                      ],
+                    ),
+                    child: Padding(
+                      padding: const EdgeInsets.fromLTRB(18, 18, 18, 14),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          Center(
+                            child: Container(
+                              width: 44,
+                              height: 4,
+                              decoration: BoxDecoration(
+                                color: scheme.onSurfaceVariant.withValues(
+                                  alpha: 0.25,
+                                ),
+                                borderRadius: BorderRadius.circular(4),
+                              ),
+                            ),
+                          ),
+                          const SizedBox(height: 16),
+                          Text(
+                            s.chooseLanguage,
+                            style: textTheme.titleMedium?.copyWith(
+                              fontWeight: FontWeight.w800,
+                              letterSpacing: -0.3,
+                            ),
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            s.chooseLanguageHint,
+                            style: textTheme.bodySmall?.copyWith(
+                              color: scheme.onSurfaceVariant,
+                            ),
+                          ),
+                          const SizedBox(height: 18),
+                          _LanguageOption(
+                            locale: const Locale('uz'),
+                            selected: current.languageCode == 'uz',
+                            onTap: () {
+                              ref
+                                  .read(localeProvider.notifier)
+                                  .setLocale(const Locale('uz'));
+                              Navigator.of(sheetCtx).pop();
+                            },
+                          ),
+                          const SizedBox(height: 10),
+                          _LanguageOption(
+                            locale: const Locale('en'),
+                            selected: current.languageCode == 'en',
+                            onTap: () {
+                              ref
+                                  .read(localeProvider.notifier)
+                                  .setLocale(const Locale('en'));
+                              Navigator.of(sheetCtx).pop();
+                            },
+                          ),
+                          const SizedBox(height: 10),
+                          _LanguageOption(
+                            locale: const Locale('ru'),
+                            selected: current.languageCode == 'ru',
+                            onTap: () {
+                              ref
+                                  .read(localeProvider.notifier)
+                                  .setLocale(const Locale('ru'));
+                              Navigator.of(sheetCtx).pop();
+                            },
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final scheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
+    final s = S.of(context);
     final user = ref.watch(authNotifierProvider).user;
     final attendance = ref.watch(attendanceProvider);
     final tasks = ref.watch(tasksProvider);
     final themeMode = ref.watch(themeModeProvider);
+    final locale = ref.watch(localeProvider);
 
     final mine = user;
-    final myAttendance = mine == null
-        ? null
-        : attendance.firstWhere(
-            (e) => e.id == mine.id,
-            orElse: () => attendance.isNotEmpty
-                ? attendance.first
-                : attendance.first,
-          );
+    PersonAttendance? myAttendance;
+    if (mine != null) {
+      for (final item in attendance) {
+        if (item.id == mine.id) {
+          myAttendance = item;
+          break;
+        }
+      }
+    }
     final myTasksCount = mine == null
         ? 0
         : tasks.where((t) => t.assigneeId == mine.id).length;
@@ -180,9 +329,9 @@ class ProfileTabPage extends ConsumerWidget {
       padding: const EdgeInsets.fromLTRB(20, 8, 20, 28),
       children: [
         _ProfileHeader(
-          name: user?.displayName ?? 'Foydalanuvchi',
+          name: user?.displayName ?? s.userFallback,
           phone: user?.phone ?? '',
-          roleLabel: _roleUz(role),
+          roleLabel: _roleLabel(s, role),
           initials: initials.isEmpty ? '?' : initials,
         ),
         const SizedBox(height: 20),
@@ -191,18 +340,18 @@ class ProfileTabPage extends ConsumerWidget {
             Expanded(
               child: _MiniStat(
                 icon: Icons.event_available_rounded,
-                title: 'Davomat',
-                value: (myAttendance?.present ?? false) ? 'Ishda' : 'Yo\'q',
-                hint: myAttendance?.checkInTime ?? '—',
+                title: s.attendance,
+                value: (myAttendance?.present ?? false) ? s.atWork : s.no,
+                hint: myAttendance?.checkInTime ?? '-',
               ),
             ),
             const SizedBox(width: 14),
             Expanded(
               child: _MiniStat(
                 icon: Icons.assignment_turned_in_rounded,
-                title: 'Topshiriq',
+                title: s.task,
                 value: '$myTasksCount',
-                hint: 'Ro\'yxatda',
+                hint: s.inList,
               ),
             ),
           ],
@@ -211,7 +360,7 @@ class ProfileTabPage extends ConsumerWidget {
         Padding(
           padding: const EdgeInsets.only(left: 4, bottom: 10),
           child: Text(
-            'Sozlamalar',
+            s.settings,
             style: textTheme.titleSmall?.copyWith(
               fontWeight: FontWeight.w800,
               letterSpacing: -0.2,
@@ -222,26 +371,26 @@ class ProfileTabPage extends ConsumerWidget {
           rows: [
             _SettingRow(
               icon: Icons.shield_outlined,
-              title: 'Xavfsizlik',
-              subtitle: 'Parol, kirish tarixi',
+              title: s.security,
+              subtitle: s.passwordLoginHistory,
               onTap: () {},
             ),
             _SettingRow(
               icon: Icons.notifications_none_rounded,
-              title: 'Bildirishnomalar',
-              subtitle: 'Push va email',
+              title: s.notifications,
+              subtitle: s.pushEmail,
               onTap: () {},
             ),
             _SettingRow(
               icon: Icons.language_rounded,
-              title: 'Til',
-              subtitle: 'O\'zbekcha',
-              onTap: () {},
+              title: s.language,
+              subtitle: _languageLabel(s, locale),
+              onTap: () => _showLanguagePicker(context, ref, locale),
             ),
             _SettingRow(
               icon: themeMode.icon,
-              title: 'Tema',
-              subtitle: themeMode.uzLabel,
+              title: s.theme,
+              subtitle: _themeLabel(s, themeMode),
               onTap: () => _showThemePicker(context, ref, themeMode),
             ),
           ],
@@ -251,14 +400,14 @@ class ProfileTabPage extends ConsumerWidget {
           rows: [
             _SettingRow(
               icon: Icons.help_outline_rounded,
-              title: 'Yordam',
-              subtitle: 'Savol-javob, qo\'llanma',
+              title: s.help,
+              subtitle: s.faqGuide,
               onTap: () {},
             ),
             _SettingRow(
               icon: Icons.info_outline_rounded,
-              title: 'Ilova haqida',
-              subtitle: 'Versiya 1.0.0',
+              title: s.aboutApp,
+              subtitle: s.appVersion,
               onTap: () {},
             ),
           ],
@@ -270,7 +419,7 @@ class ProfileTabPage extends ConsumerWidget {
             onPressed: () => ref.read(authNotifierProvider.notifier).signOut(),
             icon: Icon(Icons.logout_rounded, color: scheme.error, size: 20),
             label: Text(
-              'Chiqish',
+              s.signOut,
               style: textTheme.labelLarge?.copyWith(
                 color: scheme.error,
                 fontWeight: FontWeight.w800,
@@ -709,11 +858,17 @@ class _ThemeOption extends StatelessWidget {
     final scheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    final s = S.of(context);
 
     final hintByMode = switch (mode) {
-      ThemeMode.light => 'Doim yorug‘ tema',
-      ThemeMode.dark => 'Doim qorong‘u tema',
-      ThemeMode.system => 'Tizim sozlamasiga mos',
+      ThemeMode.light => s.themeLightHint,
+      ThemeMode.dark => s.themeDarkHint,
+      ThemeMode.system => s.themeSystemHint,
+    };
+    final labelByMode = switch (mode) {
+      ThemeMode.light => s.themeLight,
+      ThemeMode.dark => s.themeDark,
+      ThemeMode.system => s.themeSystem,
     };
 
     return Material(
@@ -780,7 +935,7 @@ class _ThemeOption extends StatelessWidget {
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     Text(
-                      mode.uzLabel,
+                      labelByMode,
                       style: textTheme.titleSmall?.copyWith(
                         fontWeight: FontWeight.w800,
                       ),
@@ -829,6 +984,165 @@ class _ThemeOption extends StatelessWidget {
                       )
                     : Container(
                         key: const ValueKey('off'),
+                        width: 26,
+                        height: 26,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: Colors.transparent,
+                          border: Border.all(
+                            color: scheme.onSurfaceVariant
+                                .withValues(alpha: 0.30),
+                            width: 1.4,
+                          ),
+                        ),
+                      ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _LanguageOption extends StatelessWidget {
+  const _LanguageOption({
+    required this.locale,
+    required this.selected,
+    required this.onTap,
+  });
+
+  final Locale locale;
+  final bool selected;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final s = S.of(context);
+
+    final title = switch (locale.languageCode) {
+      'en' => s.languageEnglish,
+      'ru' => s.languageRussian,
+      _ => s.languageUzbek,
+    };
+    final hint = switch (locale.languageCode) {
+      'en' => s.languageEnglishHint,
+      'ru' => s.languageRussianHint,
+      _ => s.languageUzbekHint,
+    };
+
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(AppRadius.md),
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 180),
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+          decoration: BoxDecoration(
+            color: selected
+                ? scheme.primary.withValues(alpha: isDark ? 0.18 : 0.10)
+                : Colors.transparent,
+            borderRadius: BorderRadius.circular(AppRadius.md),
+            border: Border.all(
+              color: selected
+                  ? scheme.primary.withValues(alpha: isDark ? 0.50 : 0.35)
+                  : (isDark
+                      ? AppColors.darkBorder.withValues(alpha: 0.6)
+                      : const Color(0xFFE6EBF4)),
+              width: selected ? 1.4 : 1,
+            ),
+          ),
+          child: Row(
+            children: [
+              Container(
+                width: 42,
+                height: 42,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(12),
+                  gradient: selected
+                      ? LinearGradient(
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
+                          colors: [
+                            scheme.primary,
+                            Color.lerp(scheme.primary, Colors.black, 0.18)!,
+                          ],
+                        )
+                      : null,
+                  color:
+                      selected ? null : scheme.primary.withValues(alpha: 0.12),
+                  border: selected
+                      ? null
+                      : Border.all(
+                          color: scheme.primary.withValues(alpha: 0.22),
+                        ),
+                ),
+                child: Icon(
+                  Icons.language_rounded,
+                  color: selected ? Colors.white : scheme.primary,
+                  size: 22,
+                ),
+              ),
+              const SizedBox(width: 14),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      title,
+                      style: textTheme.titleSmall?.copyWith(
+                        fontWeight: FontWeight.w800,
+                      ),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      hint,
+                      style: textTheme.bodySmall?.copyWith(
+                        color: scheme.onSurfaceVariant,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              AnimatedSwitcher(
+                duration: const Duration(milliseconds: 180),
+                transitionBuilder: (child, anim) =>
+                    ScaleTransition(scale: anim, child: child),
+                child: selected
+                    ? Container(
+                        key: const ValueKey('language-on'),
+                        width: 26,
+                        height: 26,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          gradient: LinearGradient(
+                            colors: [
+                              scheme.primary,
+                              Color.lerp(scheme.primary, Colors.black, 0.18)!,
+                            ],
+                          ),
+                          boxShadow: [
+                            BoxShadow(
+                              color: scheme.primary.withValues(alpha: 0.45),
+                              blurRadius: 10,
+                              offset: const Offset(0, 4),
+                              spreadRadius: -3,
+                            ),
+                          ],
+                        ),
+                        child: const Icon(
+                          Icons.check_rounded,
+                          color: Colors.white,
+                          size: 16,
+                        ),
+                      )
+                    : Container(
+                        key: const ValueKey('language-off'),
                         width: 26,
                         height: 26,
                         decoration: BoxDecoration(

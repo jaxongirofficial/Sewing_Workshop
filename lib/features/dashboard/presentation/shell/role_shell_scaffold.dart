@@ -5,6 +5,7 @@ import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../core/enums/user_role.dart';
+import '../../../../l10n/s.dart';
 import '../../../../shared/widgets/brand/brand_bottom_bar.dart';
 import '../../../../shared/widgets/brand/brand_dashboard_backdrop.dart';
 
@@ -19,50 +20,50 @@ class RoleShellScaffold extends StatelessWidget {
   final UserRole role;
   final StatefulNavigationShell navigationShell;
 
-  static String _greetingTitle(UserRole role, int idx) {
-    final task = role == UserRole.worker ? 'Mening ishlarim' : 'Topshiriqlar';
+  static String _greetingTitle(S s, UserRole role, int idx) {
+    final task = role == UserRole.worker ? s.myTasks : s.tasks;
     return switch (idx) {
-      0 => 'Bosh sahifa',
-      1 => 'Davomat',
+      0 => s.homePage,
+      1 => s.attendance,
       2 => task,
-      3 => 'Ombor',
-      _ => 'Profil',
+      3 => s.warehouse,
+      _ => s.profile,
     };
   }
 
-  static String _roleSubtitle(UserRole role) => switch (role) {
-        UserRole.owner => 'Egasi',
-        UserRole.manager => 'Menejer',
-        UserRole.worker => 'Ishchi',
+  static String _roleSubtitle(S s, UserRole role) => switch (role) {
+        UserRole.owner => s.roleOwner,
+        UserRole.manager => s.roleManager,
+        UserRole.worker => s.roleWorker,
       };
 
-  static List<BrandNavItem> _items(UserRole role) {
-    final taskLabel = role == UserRole.worker ? 'Ishlarim' : 'Topshiriq';
+  static List<BrandNavItem> _items(S s, UserRole role) {
+    final taskLabel = role == UserRole.worker ? s.myTasks : s.task;
     return [
-      const BrandNavItem(
+      BrandNavItem(
         icon: Icons.space_dashboard_outlined,
         activeIcon: Icons.space_dashboard_rounded,
-        label: 'Bosh',
+        label: s.home,
       ),
-      const BrandNavItem(
+      BrandNavItem(
         icon: Icons.event_available_outlined,
         activeIcon: Icons.event_available_rounded,
-        label: 'Davomat',
+        label: s.attendance,
       ),
       BrandNavItem(
         icon: Icons.work_outline_rounded,
         activeIcon: Icons.work_rounded,
         label: taskLabel,
       ),
-      const BrandNavItem(
+      BrandNavItem(
         icon: Icons.warehouse_outlined,
         activeIcon: Icons.warehouse_rounded,
-        label: 'Ombor',
+        label: s.warehouse,
       ),
-      const BrandNavItem(
+      BrandNavItem(
         icon: Icons.account_circle_outlined,
         activeIcon: Icons.account_circle_rounded,
-        label: 'Profil',
+        label: s.profile,
       ),
     ];
   }
@@ -72,6 +73,7 @@ class RoleShellScaffold extends StatelessWidget {
     final scheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    final s = S.of(context);
     final idx = navigationShell.currentIndex;
     final bottomInset = MediaQuery.paddingOf(context).bottom;
 
@@ -131,7 +133,7 @@ class RoleShellScaffold extends StatelessWidget {
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
                                   Text(
-                                    _greetingTitle(role, idx),
+                                    _greetingTitle(s, role, idx),
                                     style: textTheme.titleLarge?.copyWith(
                                       fontWeight: FontWeight.w800,
                                       letterSpacing: -0.4,
@@ -142,7 +144,7 @@ class RoleShellScaffold extends StatelessWidget {
                                   ),
                                   const SizedBox(height: 2),
                                   Text(
-                                    _roleSubtitle(role),
+                                    _roleSubtitle(s, role),
                                     style: textTheme.bodySmall?.copyWith(
                                       color: scheme.onSurfaceVariant,
                                       fontWeight: FontWeight.w600,
@@ -200,7 +202,7 @@ class RoleShellScaffold extends StatelessWidget {
             bottomNavigationBar: BrandBottomBar(
               currentIndex: idx,
               onSelect: navigationShell.goBranch,
-              items: _items(role),
+              items: _items(s, role),
             ),
           ),
         ],

@@ -6,12 +6,19 @@ import '../../../../../config/routes/route_paths.dart';
 import '../../../../../config/theme/app_colors.dart';
 import '../../../../../config/theme/app_radius.dart';
 import '../../../../../core/enums/user_role.dart';
+import '../../../../../l10n/s.dart';
 import '../../../../../shared/models/app_user.dart';
 import '../../../../../shared/widgets/brand/brand_stat_card.dart';
 import '../../../../../shared/widgets/brand/brand_surface.dart';
 import '../../../../auth/presentation/providers/auth_notifier.dart';
 import '../../models/workshop_mock_models.dart';
 import '../../providers/workshop_mock_providers.dart';
+
+String _localizedTaskTitle(WorkshopTaskItem task, S s) => switch (task.id) {
+      't-1' => s.seedTaskDresses,
+      't-2' => s.seedTaskQc,
+      _ => task.title,
+    };
 
 /// Premium bosh sahifa — har bir rol uchun moslashtirilgan kartochkalar.
 class HomeTabPage extends ConsumerWidget {
@@ -33,17 +40,15 @@ class HomeTabPage extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final s = S.of(context);
     final user = ref.watch(authNotifierProvider).user;
     final attendance = ref.watch(attendanceProvider);
     final tasks = ref.watch(tasksProvider);
 
     final subtitle = switch (role) {
-      UserRole.owner =>
-        'Umumiy ko\'rinish — davomat va topshiriqlar bitta joyda.',
-      UserRole.manager =>
-        'Jamoa va ish — davomatni yangilang, topshiriq bering.',
-      UserRole.worker =>
-        'Bugungi shift — ish holatingiz va vazifalar.',
+      UserRole.owner => s.ownerHomeSubtitle,
+      UserRole.manager => s.managerHomeSubtitle,
+      UserRole.worker => s.workerHomeSubtitle,
     };
 
     final firstName = (user?.displayName.trim().isNotEmpty ?? false)
@@ -73,10 +78,8 @@ class HomeTabPage extends ConsumerWidget {
           ),
         const SizedBox(height: 22),
         _SectionTitle(
-          title: role == UserRole.worker
-              ? 'Mening topshiriqlarim'
-              : 'Oxirgi topshiriqlar',
-          actionLabel: 'Hammasi',
+          title: role == UserRole.worker ? s.myTasks : s.recentTasks,
+          actionLabel: s.all,
           onAction: () => context.go(_tasksPath()),
         ),
         const SizedBox(height: 10),
@@ -84,15 +87,13 @@ class HomeTabPage extends ConsumerWidget {
           tasks: role == UserRole.worker && user != null
               ? tasks.where((t) => t.assigneeId == user.id).toList()
               : tasks,
-          emptyText: role == UserRole.worker
-              ? 'Sizga topshiriq biriktirilmagan'
-              : 'Hozircha topshiriq yo\'q',
+          emptyText: role == UserRole.worker ? s.noAssignedTasks : s.noTasksYet,
         ),
         if (role != UserRole.worker) ...[
           const SizedBox(height: 22),
           _SectionTitle(
-            title: 'Jamoa holati',
-            actionLabel: 'To\'liq ro\'yxat',
+            title: s.teamStatus,
+            actionLabel: s.fullList,
             onAction: () => context.go(_attendancePath()),
           ),
           const SizedBox(height: 10),
@@ -115,6 +116,7 @@ class _GreetingCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
+    final s = S.of(context);
 
     return BrandSurface(
       radius: AppRadius.xl,
@@ -158,7 +160,7 @@ class _GreetingCard extends StatelessWidget {
               mainAxisSize: MainAxisSize.min,
               children: [
                 Text(
-                  name.isEmpty ? 'Salom' : 'Salom, $name',
+                  name.isEmpty ? s.hello : s.helloName(name),
                   style: textTheme.titleLarge?.copyWith(
                     fontWeight: FontWeight.w800,
                     letterSpacing: -0.4,
@@ -204,6 +206,7 @@ class _OwnerManagerCards extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final s = S.of(context);
     final present = attendance.where((e) => e.present).length;
     final total = attendance.isEmpty ? 1 : attendance.length;
     final percent = ((present / total) * 100).round();
@@ -212,16 +215,16 @@ class _OwnerManagerCards extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       mainAxisSize: MainAxisSize.min,
       children: [
-        const _SectionTitle(title: 'Bugungi ko\'rsatkichlar'),
+        _SectionTitle(title: s.todayMetrics),
         const SizedBox(height: 10),
         Row(
           children: [
             Expanded(
               child: BrandStatCard(
                 icon: Icons.co_present_rounded,
-                label: 'Davomat',
+                label: s.attendance,
                 value: '$present / $total',
-                caption: 'Bugun ishda',
+                caption: s.todayAtWork,
                 trailing: BrandStatChip(
                   icon: Icons.trending_up_rounded,
                   label: '$percent%',
@@ -232,12 +235,12 @@ class _OwnerManagerCards extends StatelessWidget {
             Expanded(
               child: BrandStatCard(
                 icon: Icons.work_rounded,
-                label: 'Topshiriqlar',
+                label: s.tasks,
                 value: '${tasks.length}',
-                caption: 'Faol yozuv',
-                trailing: const BrandStatChip(
+                caption: s.activeRecords,
+                trailing: BrandStatChip(
                   icon: Icons.bolt_rounded,
-                  label: 'aktiv',
+                  label: s.active,
                 ),
               ),
             ),
@@ -246,25 +249,25 @@ class _OwnerManagerCards extends StatelessWidget {
         const SizedBox(height: 12),
         BrandStatCard(
           icon: Icons.groups_2_rounded,
-          label: 'Jamoa',
+          label: s.team,
           value: '${attendance.length}',
-          caption: 'Ishchilar ro\'yxati',
+          caption: s.workersList,
           fullWidth: true,
-          trailing: const BrandStatChip(
+          trailing: BrandStatChip(
             icon: Icons.verified_rounded,
-            label: 'demo',
+            label: s.demo,
           ),
         ),
         const SizedBox(height: 18),
-        const _SectionTitle(title: 'Tezkor harakatlar'),
+        _SectionTitle(title: s.quickActions),
         const SizedBox(height: 10),
         Row(
           children: [
             Expanded(
               child: _QuickAction(
                 icon: Icons.fact_check_rounded,
-                title: 'Davomat',
-                subtitle: 'Belgilash',
+                title: s.attendance,
+                subtitle: s.mark,
                 onTap: onOpenAttendance,
               ),
             ),
@@ -272,9 +275,8 @@ class _OwnerManagerCards extends StatelessWidget {
             Expanded(
               child: _QuickAction(
                 icon: Icons.add_task_rounded,
-                title: 'Topshiriq',
-                subtitle:
-                    role == UserRole.owner ? 'Yangi berish' : 'Tarqatish',
+                title: s.task,
+                subtitle: role == UserRole.owner ? s.createNew : s.distribute,
                 onTap: onOpenTasks,
               ),
             ),
@@ -306,6 +308,7 @@ class _WorkerCards extends StatelessWidget {
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
+    final s = S.of(context);
 
     PersonAttendance? me;
     if (user != null) {
@@ -380,7 +383,7 @@ class _WorkerCards extends StatelessWidget {
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     Text(
-                      'BUGUNGI HOLATIM',
+                      s.todayStatus,
                       style: textTheme.labelSmall?.copyWith(
                         color: Colors.white.withValues(alpha: 0.80),
                         fontWeight: FontWeight.w700,
@@ -390,7 +393,7 @@ class _WorkerCards extends StatelessWidget {
                     ),
                     const SizedBox(height: 5),
                     Text(
-                      present ? 'Ishdaman' : 'Kelmaganman',
+                      present ? s.atWork : s.notAtWork,
                       style: textTheme.headlineSmall?.copyWith(
                         color: Colors.white,
                         fontWeight: FontWeight.w800,
@@ -412,10 +415,8 @@ class _WorkerCards extends StatelessWidget {
                         Flexible(
                           child: Text(
                             present
-                                ? (time != null
-                                    ? 'Kirish: $time'
-                                    : 'Vaqt yo\'q')
-                                : 'Hali kelmagansiz',
+                                ? (time != null ? s.entryTime(time) : s.noTime)
+                                : s.notArrivedYet,
                             style: textTheme.bodySmall?.copyWith(
                               color: Colors.white.withValues(alpha: 0.88),
                               fontWeight: FontWeight.w600,
@@ -455,12 +456,12 @@ class _WorkerCards extends StatelessWidget {
             Expanded(
               child: BrandStatCard(
                 icon: Icons.work_rounded,
-                label: 'Topshiriqlarim',
+                label: s.tasks,
                 value: '$myTasksCount',
-                caption: 'Ro\'yxatda',
-                trailing: const BrandStatChip(
+                caption: s.inList,
+                trailing: BrandStatChip(
                   icon: Icons.bolt_rounded,
-                  label: 'aktiv',
+                  label: s.active,
                 ),
               ),
             ),
@@ -468,8 +469,8 @@ class _WorkerCards extends StatelessWidget {
             Expanded(
               child: _QuickAction(
                 icon: Icons.list_alt_rounded,
-                title: 'Ishlarim',
-                subtitle: 'Ro\'yxatga o\'tish',
+                title: s.myTasks,
+                subtitle: s.goToList,
                 onTap: onOpenTasks,
               ),
             ),
@@ -648,6 +649,7 @@ class _TasksPreview extends StatelessWidget {
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
+    final s = S.of(context);
 
     if (tasks.isEmpty) {
       return BrandSurface(
@@ -717,7 +719,7 @@ class _TasksPreview extends StatelessWidget {
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         Text(
-                          t.title,
+                          _localizedTaskTitle(t, s),
                           style: textTheme.titleSmall?.copyWith(
                             fontWeight: FontWeight.w700,
                           ),
@@ -802,6 +804,7 @@ class _TeamRow extends StatelessWidget {
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
+    final s = S.of(context);
     final color = p.present ? scheme.primary : scheme.onSurfaceVariant;
 
     final initials = p.name
@@ -850,8 +853,10 @@ class _TeamRow extends StatelessWidget {
                 const SizedBox(height: 2),
                 Text(
                   p.present
-                      ? 'Ishda${p.checkInTime != null ? ' • ${p.checkInTime}' : ''}'
-                      : 'Kelmagan',
+                      ? (p.checkInTime != null
+                          ? s.atWorkWithTime(p.checkInTime!)
+                          : s.atWork)
+                      : s.absent,
                   style: textTheme.bodySmall?.copyWith(
                     color: scheme.onSurfaceVariant,
                     fontWeight: FontWeight.w500,

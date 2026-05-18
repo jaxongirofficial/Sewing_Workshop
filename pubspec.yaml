@@ -10,6 +10,8 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+  flutter_localizations:
+    sdk: flutter
 
   cupertino_icons: ^1.0.8
   flutter_riverpod: ^2.6.1
@@ -25,3 +27,7 @@ dev_dependencies:
 
 flutter:
   uses-material-design: true
+  assets:
+    - lib/l10n/app_uz.arb
+    - lib/l10n/app_en.arb
+    - lib/l10n/app_ru.arb

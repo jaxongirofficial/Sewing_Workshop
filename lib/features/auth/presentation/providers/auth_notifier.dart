@@ -6,6 +6,11 @@ import '../../../../shared/models/app_user.dart';
 import '../../data/repositories/auth_repository_impl.dart';
 import '../../domain/repositories/auth_repository.dart';
 
+enum AuthFailure {
+  invalidCredentials,
+  generic,
+}
+
 final authRepositoryProvider = Provider<AuthRepository>((ref) {
   return AuthRepositoryImpl();
 });
@@ -15,31 +20,31 @@ class AuthState extends Equatable {
   const AuthState({
     this.user,
     this.isLoading = false,
-    this.errorMessage,
+    this.error,
   });
 
   final AppUser? user;
   final bool isLoading;
-  final String? errorMessage;
+  final AuthFailure? error;
 
   bool get isAuthenticated => user != null;
 
   AuthState copyWith({
     AppUser? user,
     bool? isLoading,
-    String? errorMessage,
+    AuthFailure? error,
     bool clearUser = false,
     bool clearError = false,
   }) {
     return AuthState(
       user: clearUser ? null : (user ?? this.user),
       isLoading: isLoading ?? this.isLoading,
-      errorMessage: clearError ? null : (errorMessage ?? this.errorMessage),
+      error: clearError ? null : (error ?? this.error),
     );
   }
 
   @override
-  List<Object?> get props => [user, isLoading, errorMessage];
+  List<Object?> get props => [user, isLoading, error];
 }
 
 final authNotifierProvider =
@@ -62,7 +67,7 @@ final class AuthNotifier extends StateNotifier<AuthState> {
       if (user == null) {
         state = state.copyWith(
           isLoading: false,
-          errorMessage: 'Telefon yoki parol noto\'g\'ri.',
+          error: AuthFailure.invalidCredentials,
         );
         return false;
       }
@@ -72,7 +77,7 @@ final class AuthNotifier extends StateNotifier<AuthState> {
       debugPrint('signIn failed: $e\n$st');
       state = state.copyWith(
         isLoading: false,
-        errorMessage: 'Xatolik yuz berdi. Qayta urinib ko\'ring.',
+        error: AuthFailure.generic,
       );
       return false;
     }

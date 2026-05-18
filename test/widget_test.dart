@@ -10,6 +10,7 @@ void main() {
         child: SewingWorkshopApp(),
       ),
     );
+    await tester.pumpAndSettle();
 
     expect(find.text('Sewing Workshop'), findsOneWidget);
   });
