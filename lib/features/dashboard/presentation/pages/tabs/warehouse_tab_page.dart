@@ -325,7 +325,7 @@ class _Chip extends StatelessWidget {
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final s = S.of(context);
+    S.of(context);
 
     return GestureDetector(
       onTap: onTap,
