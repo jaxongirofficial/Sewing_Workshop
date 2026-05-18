@@ -31,16 +31,25 @@ class ProfileTabPage extends ConsumerWidget {
     await showModalBottomSheet<void>(
       context: context,
       backgroundColor: Colors.transparent,
-      isScrollControlled: false,
+      isScrollControlled: true,
+      useSafeArea: true,
       builder: (sheetCtx) {
-        return Padding(
-          padding: EdgeInsets.only(
-            left: 16,
-            right: 16,
-            bottom: MediaQuery.paddingOf(sheetCtx).bottom + 16,
-            top: 8,
-          ),
-          child: Container(
+        final viewInsets = MediaQuery.viewInsetsOf(sheetCtx);
+
+        return LayoutBuilder(
+          builder: (context, constraints) {
+            return Padding(
+              padding: EdgeInsets.fromLTRB(
+                16,
+                8,
+                16,
+                viewInsets.bottom + 16,
+              ),
+              child: ConstrainedBox(
+                constraints: BoxConstraints(maxHeight: constraints.maxHeight),
+                child: SingleChildScrollView(
+                  physics: const ClampingScrollPhysics(),
+                  child: Container(
             decoration: BoxDecoration(
               color: isDark ? AppColors.darkCard : Colors.white,
               borderRadius: BorderRadius.circular(AppRadius.xl),
@@ -127,7 +136,11 @@ class ProfileTabPage extends ConsumerWidget {
                 ],
               ),
             ),
-          ),
+                  ),
+                ),
+              ),
+            );
+          },
         );
       },
     );
