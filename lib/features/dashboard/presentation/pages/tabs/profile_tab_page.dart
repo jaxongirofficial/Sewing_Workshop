@@ -10,6 +10,7 @@ import '../../../../../l10n/s.dart';
 import '../../../../auth/presentation/providers/auth_notifier.dart';
 import '../../models/workshop_mock_models.dart';
 import '../../providers/workshop_mock_providers.dart';
+import '../../../../../shared/widgets/brand/language_flag_badge.dart';
 
 class ProfileTabPage extends ConsumerWidget {
   const ProfileTabPage({super.key, required this.role});
@@ -1058,34 +1059,10 @@ class _LanguageOption extends StatelessWidget {
           ),
           child: Row(
             children: [
-              Container(
-                width: 42,
-                height: 42,
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(12),
-                  gradient: selected
-                      ? LinearGradient(
-                          begin: Alignment.topLeft,
-                          end: Alignment.bottomRight,
-                          colors: [
-                            scheme.primary,
-                            Color.lerp(scheme.primary, Colors.black, 0.18)!,
-                          ],
-                        )
-                      : null,
-                  color:
-                      selected ? null : scheme.primary.withValues(alpha: 0.12),
-                  border: selected
-                      ? null
-                      : Border.all(
-                          color: scheme.primary.withValues(alpha: 0.22),
-                        ),
-                ),
-                child: Icon(
-                  Icons.language_rounded,
-                  color: selected ? Colors.white : scheme.primary,
-                  size: 22,
-                ),
+              LanguageFlagBadge(
+                languageCode: locale.languageCode,
+                diameter: 48,
+                selected: selected,
               ),
               const SizedBox(width: 14),
               Expanded(
