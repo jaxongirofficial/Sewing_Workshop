@@ -201,3 +201,19 @@ final warehouseProvider =
     StateNotifierProvider<WarehouseNotifier, List<WarehouseItem>>((ref) {
   return WarehouseNotifier();
 });
+
+// ─── Employees (xodimlar) ─────────────────────────────────────────────────────
+
+final class EmployeesNotifier extends StateNotifier<List<Employee>> {
+  EmployeesNotifier() : super(const []);
+
+  void add(Employee e) => state = [e, ...state];
+
+  void remove(String id) =>
+      state = state.where((e) => e.id != id).toList(growable: false);
+}
+
+final employeesProvider =
+    StateNotifierProvider<EmployeesNotifier, List<Employee>>((ref) {
+  return EmployeesNotifier();
+});

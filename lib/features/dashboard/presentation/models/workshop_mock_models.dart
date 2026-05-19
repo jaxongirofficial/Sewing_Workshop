@@ -42,6 +42,29 @@ class WorkshopTaskItem {
   final String assigneeName;
 }
 
+/// Owner tomonidan qo'shilgan xodim (worker yoki manager).
+class Employee {
+  const Employee({
+    required this.id,
+    required this.firstName,
+    required this.lastName,
+    required this.phone,
+    required this.role,
+    this.birthDate,
+  });
+
+  final String id;
+  final String firstName;
+  final String lastName;
+  final String phone;
+
+  /// `worker` yoki `manager`.
+  final String role;
+  final DateTime? birthDate;
+
+  String get fullName => '$firstName $lastName'.trim();
+}
+
 /// Ombordagi mahsulot kategoriyasi.
 enum WarehouseCategory {
   clothing,

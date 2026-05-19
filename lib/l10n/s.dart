@@ -199,6 +199,32 @@ class S {
   String get themeLightHint => _t('themeLightHint');
   String get themeDarkHint => _t('themeDarkHint');
   String get themeSystemHint => _t('themeSystemHint');
+
+  String get addEmployeeTooltip => _t('addEmployeeTooltip');
+  String get newEmployee => _t('newEmployee');
+  String get expandTeam => _t('expandTeam');
+  String get expandTeamHint => _t('expandTeamHint');
+  String get personalInfo => _t('personalInfo');
+  String get firstNameHint => _t('firstNameHint');
+  String get lastNameHint => _t('lastNameHint');
+  String get firstNameRequired => _t('firstNameRequired');
+  String get lastNameRequired => _t('lastNameRequired');
+  String get birthDate => _t('birthDate');
+  String get pickBirthDate => _t('pickBirthDate');
+  String get rolePosition => _t('rolePosition');
+  String get roleTailor => _t('roleTailor');
+  String get roleTailorHint => _t('roleTailorHint');
+  String get roleManagerHint => _t('roleManagerHint');
+  String get loginInfo => _t('loginInfo');
+  String get phoneIncomplete => _t('phoneIncomplete');
+  String get passwordMin4 => _t('passwordMin4');
+  String get confirmPasswordHint => _t('confirmPasswordHint');
+  String get confirmPasswordRequired => _t('confirmPasswordRequired');
+  String get passwordMismatch => _t('passwordMismatch');
+  String get addEmployeeAction => _t('addEmployeeAction');
+  String get employeeFooterHint => _t('employeeFooterHint');
+  String employeeAddedSnack(String name) =>
+      _f('employeeAddedSnack', {'name': name});
 }
 
 class _SDelegate extends LocalizationsDelegate<S> {

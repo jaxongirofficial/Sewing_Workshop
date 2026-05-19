@@ -61,7 +61,8 @@ class BrandBottomBar extends StatelessWidget {
                   spreadRadius: -10,
                 ),
                 BoxShadow(
-                  color: scheme.primary.withValues(alpha: isDark ? 0.20 : 0.14),
+                  color:
+                      scheme.primary.withValues(alpha: isDark ? 0.20 : 0.14),
                   blurRadius: 26,
                   offset: const Offset(0, 8),
                   spreadRadius: -16,
@@ -185,5 +186,85 @@ class _NavSlot extends StatelessWidget {
         ),
       ),
     );
+  }
+}
+
+/// Brend gradientidagi mustaqil yumaloq FAB tugma.
+///
+/// `Scaffold.floatingActionButton` orqali ishlatiladi — Flutter o'zi
+/// to'g'ri joylashtiradi (`endFloat` location bilan birga).
+class BrandFab extends StatelessWidget {
+  const BrandFab({
+    super.key,
+    required this.icon,
+    required this.onTap,
+    this.tooltip,
+  });
+
+  final IconData icon;
+  final VoidCallback onTap;
+  final String? tooltip;
+
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
+    final btn = SizedBox(
+      width: 60,
+      height: 60,
+      child: Material(
+        color: Colors.transparent,
+        shape: const CircleBorder(),
+        clipBehavior: Clip.antiAlias,
+        child: InkWell(
+          onTap: () {
+            HapticFeedback.mediumImpact();
+            onTap();
+          },
+          splashColor: Colors.white.withValues(alpha: 0.18),
+          highlightColor: Colors.white.withValues(alpha: 0.06),
+          child: DecoratedBox(
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              gradient: LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: [
+                  scheme.primary,
+                  Color.lerp(scheme.primary, Colors.black,
+                      isDark ? 0.14 : 0.28)!,
+                ],
+              ),
+              border: Border.all(
+                color: isDark
+                    ? Colors.white.withValues(alpha: 0.12)
+                    : Colors.white.withValues(alpha: 0.85),
+                width: 2.5,
+              ),
+              boxShadow: [
+                BoxShadow(
+                  color: scheme.primary.withValues(alpha: 0.55),
+                  blurRadius: 22,
+                  offset: const Offset(0, 10),
+                  spreadRadius: -4,
+                ),
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: isDark ? 0.45 : 0.16),
+                  blurRadius: 16,
+                  offset: const Offset(0, 6),
+                  spreadRadius: -8,
+                ),
+              ],
+            ),
+            child: Center(
+              child: Icon(icon, color: Colors.white, size: 28),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    return tooltip == null ? btn : Tooltip(message: tooltip!, child: btn);
   }
 }

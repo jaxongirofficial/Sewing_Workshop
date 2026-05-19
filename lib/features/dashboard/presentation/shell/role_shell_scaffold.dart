@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../../config/routes/route_paths.dart';
 import '../../../../core/enums/user_role.dart';
 import '../../../../l10n/s.dart';
 import '../../../../shared/widgets/brand/brand_bottom_bar.dart';
@@ -199,6 +200,19 @@ class RoleShellScaffold extends StatelessWidget {
               padding: EdgeInsets.only(bottom: dockReserve),
               child: navigationShell,
             ),
+            floatingActionButton: role == UserRole.owner
+                ? Padding(
+                    // BrandBottomBar dan biroz tepada — gorizontalda o'ng tomonda.
+                    padding: const EdgeInsets.only(bottom: 18),
+                    child: BrandFab(
+                      icon: Icons.person_add_alt_1_rounded,
+                      tooltip: s.addEmployeeTooltip,
+                      onTap: () => context.push(AppRoutes.ownerAddEmployee),
+                    ),
+                  )
+                : null,
+            floatingActionButtonLocation:
+                FloatingActionButtonLocation.endFloat,
             bottomNavigationBar: BrandBottomBar(
               currentIndex: idx,
               onSelect: navigationShell.goBranch,

@@ -8,6 +8,7 @@ abstract final class AppRoutes {
   static const String ownerTasks = '/owner/tasks';
   static const String ownerWarehouse = '/owner/warehouse';
   static const String ownerProfile = '/owner/profile';
+  static const String ownerAddEmployee = '/owner/employees/new';
 
   static const String managerHome = '/manager/home';
   static const String managerAttendance = '/manager/attendance';

@@ -6,6 +6,7 @@ import '../../core/enums/user_role.dart';
 import '../../features/auth/presentation/pages/login_page.dart';
 import '../../features/auth/presentation/pages/splash_page.dart';
 import '../../features/auth/presentation/providers/auth_notifier.dart';
+import '../../features/dashboard/presentation/pages/add_employee_page.dart';
 import '../../features/dashboard/presentation/pages/tabs/attendance_tab_page.dart';
 import '../../features/dashboard/presentation/pages/tabs/home_tab_page.dart';
 import '../../features/dashboard/presentation/pages/tabs/profile_tab_page.dart';
@@ -290,6 +291,15 @@ final goRouterProvider = Provider<GoRouter>((ref) {
       _ownerShell(),
       _managerShell(),
       _workerShell(),
+      GoRoute(
+        path: AppRoutes.ownerAddEmployee,
+        parentNavigatorKey: rootNavigatorKey,
+        pageBuilder: (context, state) => MaterialPage<void>(
+          key: state.pageKey,
+          fullscreenDialog: true,
+          child: const AddEmployeePage(),
+        ),
+      ),
     ],
   );
 });
