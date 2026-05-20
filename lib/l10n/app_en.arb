@@ -135,7 +135,7 @@
   "themeLightHint": "Always use light theme",
   "themeDarkHint": "Always use dark theme",
   "themeSystemHint": "Match system settings",
-  "addEmployeeTooltip": "Add new employee",
+  "addEmployeeTooltip": "Add employee • Long-press to move",
   "newEmployee": "New employee",
   "expandTeam": "Expand your team",
   "expandTeamHint": "Quickly add a tailor or manager",
@@ -152,7 +152,7 @@
   "roleManagerHint": "Supervises team",
   "loginInfo": "Login info",
   "phoneIncomplete": "Enter the full phone number",
-  "passwordMin4": "Enter at least 4 characters",
+  "passwordMin6": "Password must be at least 6 characters",
   "confirmPasswordHint": "Confirm password",
   "confirmPasswordRequired": "Re-enter the password",
   "passwordMismatch": "Passwords do not match",
@@ -161,5 +161,14 @@
   "employeeAddedSnack": "{name} added successfully",
   "workersCount": "{count} workers",
   "workersEmpty": "No workers yet",
-  "workersEmptyHint": "Use the + button below to add a new employee"
+  "workersEmptyHint": "Use the + button below to add a new employee",
+  "metricsPercent": "{percent}%",
+  "hubSectionTitle": "Main sections",
+  "openAttendance": "Mark attendance",
+  "openTasks": "Manage tasks",
+  "openTeamList": "View workers list",
+  "workerUpdateStatus": "Update my status",
+  "workerViewTasks": "Go to my tasks",
+  "attendanceRatio": "{present} / {total}",
+  "confirmOk": "OK"
 }

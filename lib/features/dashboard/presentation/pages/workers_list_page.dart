@@ -208,22 +208,21 @@ class _WorkerTile extends StatelessWidget {
         .join()
         .toUpperCase();
 
-    final subtitle = worker.phone ??
-        (worker.present == null
-            ? _roleLabel(s)
-            : (atWork
-                ? (worker.checkInTime != null
-                    ? s.atWorkWithTime(worker.checkInTime!)
-                    : s.atWork)
-                : s.absent));
+    final statusText = worker.present == null
+        ? null
+        : (atWork
+            ? (worker.checkInTime != null
+                ? s.atWorkWithTime(worker.checkInTime!)
+                : s.atWork)
+            : s.absent);
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 10),
       child: Row(
         children: [
           Container(
-            width: 42,
-            height: 42,
+            width: 44,
+            height: 44,
             decoration: BoxDecoration(
               shape: BoxShape.circle,
               color: statusColor.withValues(alpha: 0.14),
@@ -254,29 +253,64 @@ class _WorkerTile extends StatelessWidget {
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),
-                const SizedBox(height: 2),
-                Text(
-                  subtitle,
-                  style: textTheme.bodySmall?.copyWith(
-                    color: scheme.onSurfaceVariant,
-                    height: 1.3,
+                if (worker.phone != null) ...[
+                  const SizedBox(height: 2),
+                  Row(
+                    children: [
+                      Icon(
+                        Icons.phone_iphone_rounded,
+                        size: 12,
+                        color: scheme.onSurfaceVariant.withValues(alpha: 0.7),
+                      ),
+                      const SizedBox(width: 4),
+                      Flexible(
+                        child: Text(
+                          worker.phone!,
+                          style: textTheme.bodySmall?.copyWith(
+                            color: scheme.onSurfaceVariant,
+                            height: 1.2,
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                    ],
                   ),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
+                ],
+                if (statusText != null) ...[
+                  const SizedBox(height: 3),
+                  Row(
+                    children: [
+                      Container(
+                        width: 7,
+                        height: 7,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: statusColor,
+                        ),
+                      ),
+                      const SizedBox(width: 6),
+                      Flexible(
+                        child: Text(
+                          statusText,
+                          style: textTheme.bodySmall?.copyWith(
+                            color: statusColor,
+                            fontWeight: FontWeight.w600,
+                            fontSize: 11.5,
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
               ],
             ),
           ),
           if (worker.role != null) ...[
             const SizedBox(width: 8),
             _RoleBadge(label: _roleLabel(s)),
-          ] else if (worker.present != null) ...[
-            const SizedBox(width: 8),
-            Icon(
-              atWork ? Icons.circle : Icons.circle_outlined,
-              size: 10,
-              color: statusColor,
-            ),
           ],
         ],
       ),

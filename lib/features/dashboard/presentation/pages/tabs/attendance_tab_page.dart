@@ -23,6 +23,8 @@ class AttendanceTabPage extends ConsumerWidget {
     final s = S.of(context);
     final user = ref.watch(authNotifierProvider).user;
     final list = ref.watch(attendanceProvider);
+    final employees = ref.watch(employeesProvider);
+    final employeeById = {for (final e in employees) e.id: e};
 
     late final List<PersonAttendance> rows;
     if (role == UserRole.worker && user != null) {
@@ -108,16 +110,28 @@ class AttendanceTabPage extends ConsumerWidget {
         ...rows.map((p) {
           final canToggle =
               role != UserRole.worker || (user != null && p.id == user.id);
+          final emp = employeeById[p.id];
+          final subtitleParts = <String>[];
+          subtitleParts.add(
+            p.present
+                ? (p.checkInTime != null
+                    ? s.atWorkWithTime(p.checkInTime!)
+                    : s.atWork)
+                : s.absent,
+          );
+          if (emp != null) {
+            subtitleParts.add(
+              emp.role == 'manager' ? s.roleManager : s.roleTailor,
+            );
+          }
           return Padding(
             padding: const EdgeInsets.only(bottom: 10),
             child: BrandSwitchTile(
-              leadingIcon: Icons.person_rounded,
+              leadingIcon: emp?.role == 'manager'
+                  ? Icons.supervisor_account_rounded
+                  : Icons.person_rounded,
               title: p.name,
-              subtitle: p.present
-                  ? (p.checkInTime != null
-                      ? s.atWorkWithTime(p.checkInTime!)
-                      : s.atWork)
-                  : s.absent,
+              subtitle: subtitleParts.join(' • '),
               value: p.present,
               enabled: canToggle,
               onChanged: canToggle

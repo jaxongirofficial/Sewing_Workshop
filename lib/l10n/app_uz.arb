@@ -135,7 +135,7 @@
   "themeLightHint": "Doim yorug' tema",
   "themeDarkHint": "Doim qorong'u tema",
   "themeSystemHint": "Tizim sozlamasiga mos",
-  "addEmployeeTooltip": "Yangi xodim qo'shish",
+  "addEmployeeTooltip": "Yangi xodim qo'shish • Uzoq bosib ko'chiring",
   "newEmployee": "Yangi xodim",
   "expandTeam": "Jamoa kengaytirilsin",
   "expandTeamHint": "Tikuvchi yoki menejerni tezda qo'shing",
@@ -152,7 +152,7 @@
   "roleManagerHint": "Boshqaruvchi",
   "loginInfo": "Kirish ma'lumotlari",
   "phoneIncomplete": "Telefon raqamini to'liq kiriting",
-  "passwordMin4": "Kamida 4 belgi kiriting",
+  "passwordMin6": "Parol kamida 6 ta belgidan iborat bo'lishi kerak",
   "confirmPasswordHint": "Parolni tasdiqlang",
   "confirmPasswordRequired": "Parolni qayta kiriting",
   "passwordMismatch": "Parollar mos kelmayapti",
@@ -161,5 +161,14 @@
   "employeeAddedSnack": "{name} muvaffaqiyatli qo'shildi",
   "workersCount": "{count} ta ishchi",
   "workersEmpty": "Hozircha ishchi yo'q",
-  "workersEmptyHint": "Pastdagi + tugmasi orqali yangi xodim qo'shing"
+  "workersEmptyHint": "Pastdagi + tugmasi orqali yangi xodim qo'shing",
+  "metricsPercent": "{percent}%",
+  "hubSectionTitle": "Asosiy bo'limlar",
+  "openAttendance": "Davomatni belgilash",
+  "openTasks": "Topshiriqlarni boshqarish",
+  "openTeamList": "Ishchilar ro'yxatini ko'rish",
+  "workerUpdateStatus": "Holatimni yangilash",
+  "workerViewTasks": "Ishlarimga o'tish",
+  "attendanceRatio": "{present} / {total}",
+  "confirmOk": "OK"
 }

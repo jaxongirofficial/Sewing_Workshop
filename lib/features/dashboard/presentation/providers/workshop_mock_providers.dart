@@ -214,7 +214,50 @@ final warehouseProvider =
 // ─── Employees (xodimlar) ─────────────────────────────────────────────────────
 
 final class EmployeesNotifier extends StateNotifier<List<Employee>> {
-  EmployeesNotifier() : super(const []);
+  EmployeesNotifier() : super(_seed);
+
+  static final _seed = <Employee>[
+    Employee(
+      id: 'user-worker-1',
+      firstName: 'Javlon',
+      lastName: 'Toshmatov',
+      phone: '+998 90 123 45 67',
+      role: 'worker',
+      birthDate: DateTime(1998, 4, 12),
+    ),
+    Employee(
+      id: 'w-2',
+      firstName: 'Nilufar',
+      lastName: 'Karimova',
+      phone: '+998 91 234 56 78',
+      role: 'worker',
+      birthDate: DateTime(2000, 8, 3),
+    ),
+    Employee(
+      id: 'w-3',
+      firstName: 'Sherzod',
+      lastName: 'Mamadov',
+      phone: '+998 93 345 67 89',
+      role: 'manager',
+      birthDate: DateTime(1992, 11, 21),
+    ),
+    Employee(
+      id: 'w-4',
+      firstName: 'Dilnoza',
+      lastName: 'Ergasheva',
+      phone: '+998 94 456 78 90',
+      role: 'worker',
+      birthDate: DateTime(1999, 2, 17),
+    ),
+    Employee(
+      id: 'w-5',
+      firstName: 'Bekzod',
+      lastName: 'Rahimov',
+      phone: '+998 95 567 89 01',
+      role: 'worker',
+      birthDate: DateTime(1997, 6, 30),
+    ),
+  ];
 
   void add(Employee e) => state = [e, ...state];
 

@@ -230,14 +230,14 @@ class _SumCard extends StatelessWidget {
 
     return BrandSurface(
       solid: true,
-      padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 12),
+      padding: const EdgeInsets.fromLTRB(12, 12, 12, 12),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Container(
-            width: 36,
-            height: 36,
+            width: 34,
+            height: 34,
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(10),
               gradient: LinearGradient(
@@ -252,20 +252,31 @@ class _SumCard extends StatelessWidget {
             child: Icon(icon, size: 18, color: color),
           ),
           const SizedBox(height: 10),
-          Text(
-            value,
-            style: textTheme.titleMedium?.copyWith(
-              fontWeight: FontWeight.w900,
-              letterSpacing: -0.5,
-              color: scheme.onSurface,
+          FittedBox(
+            fit: BoxFit.scaleDown,
+            alignment: Alignment.centerLeft,
+            child: Text(
+              value,
+              style: textTheme.titleMedium?.copyWith(
+                fontWeight: FontWeight.w900,
+                letterSpacing: -0.5,
+                color: scheme.onSurface,
+                fontSize: 20,
+                height: 1.0,
+              ),
+              maxLines: 1,
             ),
           ),
+          const SizedBox(height: 2),
           Text(
             label,
             style: textTheme.labelSmall?.copyWith(
               color: scheme.onSurfaceVariant,
-              height: 1.3,
+              height: 1.2,
+              fontSize: 11,
             ),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
           ),
         ],
       ),
@@ -488,13 +499,13 @@ class _ProductCard extends StatelessWidget {
 
     return BrandSurface(
       solid: true,
-      padding: const EdgeInsets.all(14),
+      padding: const EdgeInsets.fromLTRB(12, 12, 12, 12),
       child: Row(
+        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          // Kategoriya badge
           Container(
-            width: 48,
-            height: 48,
+            width: 50,
+            height: 50,
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(14),
               gradient: LinearGradient(
@@ -508,9 +519,7 @@ class _ProductCard extends StatelessWidget {
             ),
             child: Icon(catIcon, color: catColor, size: 24),
           ),
-          const SizedBox(width: 14),
-
-          // Nom + kategoriya
+          const SizedBox(width: 12),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -522,9 +531,14 @@ class _ProductCard extends StatelessWidget {
                     fontWeight: FontWeight.w800,
                     letterSpacing: -0.2,
                   ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                 ),
-                const SizedBox(height: 3),
-                Row(
+                const SizedBox(height: 4),
+                Wrap(
+                  spacing: 6,
+                  runSpacing: 4,
+                  crossAxisAlignment: WrapCrossAlignment.center,
                   children: [
                     Container(
                       padding: const EdgeInsets.symmetric(
@@ -545,8 +559,7 @@ class _ProductCard extends StatelessWidget {
                         ),
                       ),
                     ),
-                    if (isLow) ...[
-                      const SizedBox(width: 6),
+                    if (isLow)
                       Container(
                         padding: const EdgeInsets.symmetric(
                           horizontal: 7,
@@ -558,25 +571,33 @@ class _ProductCard extends StatelessWidget {
                             alpha: isDark ? 0.22 : 0.12,
                           ),
                         ),
-                        child: Text(
-                          s.low,
-                          style: TextStyle(
-                            fontSize: 10,
-                            fontWeight: FontWeight.w700,
-                            color: AppColors.danger,
-                            letterSpacing: 0.2,
-                          ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(
+                              Icons.warning_amber_rounded,
+                              size: 10,
+                              color: AppColors.danger,
+                            ),
+                            const SizedBox(width: 3),
+                            Text(
+                              s.low,
+                              style: TextStyle(
+                                fontSize: 10,
+                                fontWeight: FontWeight.w700,
+                                color: AppColors.danger,
+                                letterSpacing: 0.2,
+                              ),
+                            ),
+                          ],
                         ),
                       ),
-                    ],
                   ],
                 ),
               ],
             ),
           ),
-          const SizedBox(width: 12),
-
-          // Miqdor
+          const SizedBox(width: 10),
           if (canEdit)
             _QuantityControl(
               value: item.quantity,
@@ -591,9 +612,8 @@ class _ProductCard extends StatelessWidget {
               unit: _unitLabel(item.unit, s),
               isLow: isLow,
             ),
-
           if (canEdit) ...[
-            const SizedBox(width: 6),
+            const SizedBox(width: 8),
             _DeleteBtn(onTap: onDelete),
           ],
         ],
@@ -673,28 +693,45 @@ class _QuantityBadge extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      crossAxisAlignment: CrossAxisAlignment.end,
-      children: [
-        Text(
-          '$quantity',
-          style: TextStyle(
-            fontSize: 20,
-            fontWeight: FontWeight.w900,
-            letterSpacing: -0.5,
-            color: isLow ? AppColors.danger : scheme.onSurface,
-          ),
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final accent = isLow ? AppColors.danger : scheme.primary;
+
+    return Container(
+      constraints: const BoxConstraints(minWidth: 64),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(14),
+        color: accent.withValues(alpha: isDark ? 0.18 : 0.10),
+        border: Border.all(
+          color: accent.withValues(alpha: isDark ? 0.35 : 0.22),
         ),
-        Text(
-          unit,
-          style: TextStyle(
-            fontSize: 10,
-            fontWeight: FontWeight.w600,
-            color: scheme.onSurfaceVariant,
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          Text(
+            '$quantity',
+            style: TextStyle(
+              fontSize: 19,
+              fontWeight: FontWeight.w900,
+              letterSpacing: -0.4,
+              color: accent,
+              height: 1.0,
+            ),
           ),
-        ),
-      ],
+          const SizedBox(height: 2),
+          Text(
+            unit,
+            style: TextStyle(
+              fontSize: 10,
+              fontWeight: FontWeight.w700,
+              color: accent.withValues(alpha: 0.85),
+              letterSpacing: 0.3,
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

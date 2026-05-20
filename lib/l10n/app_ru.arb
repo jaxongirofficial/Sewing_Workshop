@@ -135,7 +135,7 @@
   "themeLightHint": "Всегда светлая тема",
   "themeDarkHint": "Всегда темная тема",
   "themeSystemHint": "По настройкам системы",
-  "addEmployeeTooltip": "Добавить сотрудника",
+  "addEmployeeTooltip": "Добавить сотрудника • Зажмите для перемещения",
   "newEmployee": "Новый сотрудник",
   "expandTeam": "Расширим команду",
   "expandTeamHint": "Быстро добавьте швею или менеджера",
@@ -152,7 +152,7 @@
   "roleManagerHint": "Руководит командой",
   "loginInfo": "Данные для входа",
   "phoneIncomplete": "Введите номер полностью",
-  "passwordMin4": "Не менее 4 символов",
+  "passwordMin6": "Пароль должен содержать не менее 6 символов",
   "confirmPasswordHint": "Подтвердите пароль",
   "confirmPasswordRequired": "Повторите пароль",
   "passwordMismatch": "Пароли не совпадают",
@@ -161,5 +161,14 @@
   "employeeAddedSnack": "{name} успешно добавлен",
   "workersCount": "{count} сотрудников",
   "workersEmpty": "Пока нет сотрудников",
-  "workersEmptyHint": "Нажмите + внизу, чтобы добавить сотрудника"
+  "workersEmptyHint": "Нажмите + внизу, чтобы добавить сотрудника",
+  "metricsPercent": "{percent}%",
+  "hubSectionTitle": "Основные разделы",
+  "openAttendance": "Отметить посещаемость",
+  "openTasks": "Управлять задачами",
+  "openTeamList": "Список сотрудников",
+  "workerUpdateStatus": "Обновить мой статус",
+  "workerViewTasks": "Перейти к моим задачам",
+  "attendanceRatio": "{present} / {total}",
+  "confirmOk": "OK"
 }

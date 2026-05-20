@@ -57,7 +57,7 @@ class _AddEmployeePageState extends ConsumerState<AddEmployeePage> {
       lastDate: now,
       helpText: s.pickBirthDate,
       cancelText: s.cancel,
-      confirmText: 'OK',
+      confirmText: s.confirmOk,
     );
     if (picked != null) {
       setState(() => _birthDate = picked);
@@ -256,8 +256,8 @@ class _AddEmployeePageState extends ConsumerState<AddEmployeePage> {
                               () => _obscurePassword = !_obscurePassword,
                             ),
                           ),
-                          validator: (v) => (v == null || v.length < 4)
-                              ? s.passwordMin4
+                          validator: (v) => (v == null || v.length < 6)
+                              ? s.passwordMin6
                               : null,
                         ),
                         const SizedBox(height: 12),

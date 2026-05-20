@@ -217,7 +217,7 @@ class S {
   String get roleManagerHint => _t('roleManagerHint');
   String get loginInfo => _t('loginInfo');
   String get phoneIncomplete => _t('phoneIncomplete');
-  String get passwordMin4 => _t('passwordMin4');
+  String get passwordMin6 => _t('passwordMin6');
   String get confirmPasswordHint => _t('confirmPasswordHint');
   String get confirmPasswordRequired => _t('confirmPasswordRequired');
   String get passwordMismatch => _t('passwordMismatch');
@@ -228,6 +228,17 @@ class S {
   String workersCount(int count) => _f('workersCount', {'count': count});
   String get workersEmpty => _t('workersEmpty');
   String get workersEmptyHint => _t('workersEmptyHint');
+  String metricsPercent(int percent) =>
+      _f('metricsPercent', {'percent': percent});
+  String get hubSectionTitle => _t('hubSectionTitle');
+  String get openAttendance => _t('openAttendance');
+  String get openTasks => _t('openTasks');
+  String get openTeamList => _t('openTeamList');
+  String get workerUpdateStatus => _t('workerUpdateStatus');
+  String get workerViewTasks => _t('workerViewTasks');
+  String attendanceRatio(int present, int total) =>
+      _f('attendanceRatio', {'present': present, 'total': total});
+  String get confirmOk => _t('confirmOk');
 }
 
 class _SDelegate extends LocalizationsDelegate<S> {
