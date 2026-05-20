@@ -38,6 +38,12 @@ class HomeTabPage extends ConsumerWidget {
         UserRole.worker => AppRoutes.workerTasks,
       };
 
+  String _workersPath() => switch (role) {
+        UserRole.owner => AppRoutes.ownerWorkers,
+        UserRole.manager => AppRoutes.managerWorkers,
+        UserRole.worker => AppRoutes.workerHome,
+      };
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final s = S.of(context);
@@ -75,6 +81,7 @@ class HomeTabPage extends ConsumerWidget {
             tasks: tasks,
             onOpenAttendance: () => context.go(_attendancePath()),
             onOpenTasks: () => context.go(_tasksPath()),
+            onOpenWorkers: () => context.push(_workersPath()),
           ),
         const SizedBox(height: 22),
         _SectionTitle(
@@ -94,10 +101,13 @@ class HomeTabPage extends ConsumerWidget {
           _SectionTitle(
             title: s.teamStatus,
             actionLabel: s.fullList,
-            onAction: () => context.go(_attendancePath()),
+            onAction: () => context.push(_workersPath()),
           ),
           const SizedBox(height: 10),
-          _TeamPreview(rows: attendance),
+          _TeamPreview(
+            rows: attendance,
+            onTap: () => context.push(_workersPath()),
+          ),
         ],
       ],
     );
@@ -196,6 +206,7 @@ class _OwnerManagerCards extends StatelessWidget {
     required this.tasks,
     required this.onOpenAttendance,
     required this.onOpenTasks,
+    required this.onOpenWorkers,
   });
 
   final UserRole role;
@@ -203,6 +214,7 @@ class _OwnerManagerCards extends StatelessWidget {
   final List<WorkshopTaskItem> tasks;
   final VoidCallback onOpenAttendance;
   final VoidCallback onOpenTasks;
+  final VoidCallback onOpenWorkers;
 
   @override
   Widget build(BuildContext context) {
@@ -253,9 +265,10 @@ class _OwnerManagerCards extends StatelessWidget {
           value: '${attendance.length}',
           caption: s.workersList,
           fullWidth: true,
+          onTap: onOpenWorkers,
           trailing: BrandStatChip(
-            icon: Icons.verified_rounded,
-            label: s.demo,
+            icon: Icons.chevron_right_rounded,
+            label: s.fullList,
           ),
         ),
         const SizedBox(height: 18),
@@ -763,15 +776,16 @@ class _TasksPreview extends StatelessWidget {
 // ---------------------------------------------------------------------------
 
 class _TeamPreview extends StatelessWidget {
-  const _TeamPreview({required this.rows});
+  const _TeamPreview({required this.rows, this.onTap});
 
   final List<PersonAttendance> rows;
+  final VoidCallback? onTap;
 
   @override
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
     final preview = rows.take(4).toList();
-    return BrandSurface(
+    final surface = BrandSurface(
       radius: AppRadius.lg,
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       child: Column(
@@ -790,6 +804,17 @@ class _TeamPreview extends StatelessWidget {
               ),
           ],
         ],
+      ),
+    );
+
+    if (onTap == null) return surface;
+
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(AppRadius.lg),
+        child: surface,
       ),
     );
   }

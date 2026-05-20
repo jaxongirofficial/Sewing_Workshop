@@ -158,5 +158,8 @@
   "passwordMismatch": "Passwords do not match",
   "addEmployeeAction": "Add employee",
   "employeeFooterHint": "The new employee can sign in with this phone number and password.",
-  "employeeAddedSnack": "{name} added successfully"
+  "employeeAddedSnack": "{name} added successfully",
+  "workersCount": "{count} workers",
+  "workersEmpty": "No workers yet",
+  "workersEmptyHint": "Use the + button below to add a new employee"
 }

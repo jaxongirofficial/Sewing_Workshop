@@ -94,6 +94,10 @@ class _AddEmployeePageState extends ConsumerState<AddEmployeePage> {
     );
 
     ref.read(employeesProvider.notifier).add(employee);
+    ref.read(attendanceProvider.notifier).addIfMissing(
+          id: employee.id,
+          name: employee.fullName,
+        );
 
     if (!mounted) return;
     setState(() => _submitting = false);

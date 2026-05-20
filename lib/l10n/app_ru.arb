@@ -158,5 +158,8 @@
   "passwordMismatch": "Пароли не совпадают",
   "addEmployeeAction": "Добавить сотрудника",
   "employeeFooterHint": "Новый сотрудник сможет войти, используя этот номер и пароль.",
-  "employeeAddedSnack": "{name} успешно добавлен"
+  "employeeAddedSnack": "{name} успешно добавлен",
+  "workersCount": "{count} сотрудников",
+  "workersEmpty": "Пока нет сотрудников",
+  "workersEmptyHint": "Нажмите + внизу, чтобы добавить сотрудника"
 }

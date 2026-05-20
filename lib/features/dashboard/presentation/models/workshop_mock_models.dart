@@ -65,6 +65,68 @@ class Employee {
   String get fullName => '$firstName $lastName'.trim();
 }
 
+/// Bosh sahifa «Jamoa» ro'yxati uchun birlashtirilgan xodim.
+class WorkshopWorker {
+  const WorkshopWorker({
+    required this.id,
+    required this.name,
+    this.phone,
+    this.role,
+    this.present,
+    this.checkInTime,
+  });
+
+  final String id;
+  final String name;
+  final String? phone;
+
+  /// `worker` yoki `manager`; davomatdan kelganlarda null.
+  final String? role;
+  final bool? present;
+  final String? checkInTime;
+}
+
+List<WorkshopWorker> buildWorkshopWorkers(
+  List<PersonAttendance> attendance,
+  List<Employee> employees,
+) {
+  final map = <String, WorkshopWorker>{};
+
+  for (final p in attendance) {
+    map[p.id] = WorkshopWorker(
+      id: p.id,
+      name: p.name,
+      present: p.present,
+      checkInTime: p.checkInTime,
+    );
+  }
+
+  for (final e in employees) {
+    final existing = map[e.id];
+    if (existing != null) {
+      map[e.id] = WorkshopWorker(
+        id: e.id,
+        name: existing.name,
+        phone: e.phone,
+        role: e.role,
+        present: existing.present,
+        checkInTime: existing.checkInTime,
+      );
+    } else {
+      map[e.id] = WorkshopWorker(
+        id: e.id,
+        name: e.fullName,
+        phone: e.phone,
+        role: e.role,
+      );
+    }
+  }
+
+  final list = map.values.toList()
+    ..sort((a, b) => a.name.compareTo(b.name));
+  return list;
+}
+
 /// Ombordagi mahsulot kategoriyasi.
 enum WarehouseCategory {
   clothing,

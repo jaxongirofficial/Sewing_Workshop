@@ -158,5 +158,8 @@
   "passwordMismatch": "Parollar mos kelmayapti",
   "addEmployeeAction": "Xodimni qo'shish",
   "employeeFooterHint": "Yangi xodim ushbu telefon raqam va parol orqali tizimga kira oladi.",
-  "employeeAddedSnack": "{name} muvaffaqiyatli qo'shildi"
+  "employeeAddedSnack": "{name} muvaffaqiyatli qo'shildi",
+  "workersCount": "{count} ta ishchi",
+  "workersEmpty": "Hozircha ishchi yo'q",
+  "workersEmptyHint": "Pastdagi + tugmasi orqali yangi xodim qo'shing"
 }

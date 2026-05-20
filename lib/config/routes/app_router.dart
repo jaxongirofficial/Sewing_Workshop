@@ -7,6 +7,7 @@ import '../../features/auth/presentation/pages/login_page.dart';
 import '../../features/auth/presentation/pages/splash_page.dart';
 import '../../features/auth/presentation/providers/auth_notifier.dart';
 import '../../features/dashboard/presentation/pages/add_employee_page.dart';
+import '../../features/dashboard/presentation/pages/workers_list_page.dart';
 import '../../features/dashboard/presentation/pages/tabs/attendance_tab_page.dart';
 import '../../features/dashboard/presentation/pages/tabs/home_tab_page.dart';
 import '../../features/dashboard/presentation/pages/tabs/profile_tab_page.dart';
@@ -298,6 +299,22 @@ final goRouterProvider = Provider<GoRouter>((ref) {
           key: state.pageKey,
           fullscreenDialog: true,
           child: const AddEmployeePage(),
+        ),
+      ),
+      GoRoute(
+        path: AppRoutes.ownerWorkers,
+        parentNavigatorKey: rootNavigatorKey,
+        pageBuilder: (context, state) => MaterialPage<void>(
+          key: state.pageKey,
+          child: const WorkersListPage(),
+        ),
+      ),
+      GoRoute(
+        path: AppRoutes.managerWorkers,
+        parentNavigatorKey: rootNavigatorKey,
+        pageBuilder: (context, state) => MaterialPage<void>(
+          key: state.pageKey,
+          child: const WorkersListPage(),
         ),
       ),
     ],

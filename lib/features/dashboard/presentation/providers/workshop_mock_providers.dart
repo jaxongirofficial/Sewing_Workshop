@@ -54,6 +54,15 @@ final class AttendanceNotifier extends StateNotifier<List<PersonAttendance>> {
           p,
     ];
   }
+
+  /// Yangi xodim qo'shilganda davomat ro'yxatiga ham qo'shiladi.
+  void addIfMissing({required String id, required String name}) {
+    if (state.any((p) => p.id == id)) return;
+    state = [
+      ...state,
+      PersonAttendance(id: id, name: name, present: false),
+    ];
+  }
 }
 
 final attendanceProvider =
@@ -216,4 +225,11 @@ final class EmployeesNotifier extends StateNotifier<List<Employee>> {
 final employeesProvider =
     StateNotifierProvider<EmployeesNotifier, List<Employee>>((ref) {
   return EmployeesNotifier();
+});
+
+/// Davomat va qo'shilgan xodimlardan yig'ilgan jamoa ro'yxati.
+final workshopWorkersProvider = Provider<List<WorkshopWorker>>((ref) {
+  final attendance = ref.watch(attendanceProvider);
+  final employees = ref.watch(employeesProvider);
+  return buildWorkshopWorkers(attendance, employees);
 });

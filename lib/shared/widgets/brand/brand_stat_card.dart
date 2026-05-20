@@ -13,6 +13,7 @@ class BrandStatCard extends StatelessWidget {
     required this.caption,
     this.trailing,
     this.fullWidth = false,
+    this.onTap,
   });
 
   final IconData icon;
@@ -21,6 +22,7 @@ class BrandStatCard extends StatelessWidget {
   final String caption;
   final Widget? trailing;
   final bool fullWidth;
+  final VoidCallback? onTap;
 
   @override
   Widget build(BuildContext context) {
@@ -33,7 +35,7 @@ class BrandStatCard extends StatelessWidget {
         ? scheme.outline.withValues(alpha: 0.35)
         : const Color(0xFFE6EBF4);
 
-    return Container(
+    final card = Container(
       padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(AppRadius.lg),
@@ -98,6 +100,19 @@ class BrandStatCard extends StatelessWidget {
             overflow: TextOverflow.ellipsis,
           ),
         ],
+      ),
+    );
+
+    if (onTap == null) return card;
+
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(AppRadius.lg),
+        splashColor: scheme.primary.withValues(alpha: 0.12),
+        highlightColor: scheme.primary.withValues(alpha: 0.06),
+        child: card,
       ),
     );
   }

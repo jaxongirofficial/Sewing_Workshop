@@ -225,6 +225,9 @@ class S {
   String get employeeFooterHint => _t('employeeFooterHint');
   String employeeAddedSnack(String name) =>
       _f('employeeAddedSnack', {'name': name});
+  String workersCount(int count) => _f('workersCount', {'count': count});
+  String get workersEmpty => _t('workersEmpty');
+  String get workersEmptyHint => _t('workersEmptyHint');
 }
 
 class _SDelegate extends LocalizationsDelegate<S> {
