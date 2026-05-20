@@ -84,10 +84,7 @@ class S {
   String get workerHomeSubtitle => _t('workerHomeSubtitle');
   String get hello => _t('hello');
   String helloName(String name) => _f('helloName', {'name': name});
-  String get recentTasks => _t('recentTasks');
   String get all => _t('all');
-  String get teamStatus => _t('teamStatus');
-  String get fullList => _t('fullList');
   String get noAssignedTasks => _t('noAssignedTasks');
   String get noTasksYet => _t('noTasksYet');
   String get todayMetrics => _t('todayMetrics');
@@ -97,10 +94,6 @@ class S {
   String get team => _t('team');
   String get workersList => _t('workersList');
   String get demo => _t('demo');
-  String get quickActions => _t('quickActions');
-  String get mark => _t('mark');
-  String get createNew => _t('createNew');
-  String get distribute => _t('distribute');
   String get todayStatus => _t('todayStatus');
   String get atWork => _t('atWork');
   String get notAtWork => _t('notAtWork');
@@ -108,7 +101,6 @@ class S {
   String get noTime => _t('noTime');
   String get notArrivedYet => _t('notArrivedYet');
   String get inList => _t('inList');
-  String get goToList => _t('goToList');
   String atWorkWithTime(String time) => _f('atWorkWithTime', {'time': time});
   String get absent => _t('absent');
 
@@ -120,17 +112,29 @@ class S {
   }
 
   String get newTask => _t('newTask');
-  String get taskInputHint => _t('taskInputHint');
+  String get taskProductHint => _t('taskProductHint');
+  String get taskTargetQtyHint => _t('taskTargetQtyHint');
+  String get taskDeadlineLabel => _t('taskDeadlineLabel');
+  String get taskPickDeadline => _t('taskPickDeadline');
+  String get taskNoteHint => _t('taskNoteHint');
   String get assignTo => _t('assignTo');
   String get assignTask => _t('assignTask');
   String get yourTasks => _t('yourTasks');
-  String get seedTaskDresses => _t('seedTaskDresses');
-  String get seedTaskQc => _t('seedTaskQc');
+  String taskProgress(int done, int total) =>
+      _f('taskProgress', {'done': done, 'total': total});
+  String get taskDone => _t('taskDone');
+  String get taskUrgent => _t('taskUrgent');
+  String get taskOverdue => _t('taskOverdue');
+  String get updateProgress => _t('updateProgress');
+  String get doneQtyHint => _t('doneQtyHint');
+  String get editTask => _t('editTask');
+  String get deleteTask => _t('deleteTask');
+  String deleteTaskConfirm(String name) =>
+      _f('deleteTaskConfirm', {'name': name});
 
   String get deleteConfirmTitle => _t('deleteConfirmTitle');
-  String deleteWarehouseItemMessage(String name) {
-    return _f('deleteWarehouseItemMessage', {'name': name});
-  }
+  String deleteWarehouseItemMessage(String name) =>
+      _f('deleteWarehouseItemMessage', {'name': name});
 
   String get cancel => _t('cancel');
   String get delete => _t('delete');
@@ -139,6 +143,15 @@ class S {
   String get category => _t('category');
   String get allCategories => _t('allCategories');
   String get addProduct => _t('addProduct');
+  String get dispatchProduct => _t('dispatchProduct');
+  String get dispatchQtyHint => _t('dispatchQtyHint');
+  String get dispatchConfirm => _t('dispatchConfirm');
+  String dispatchSuccess(int qty, String name) =>
+      _f('dispatchSuccess', {'qty': qty, 'name': name});
+  String get pricePerUnit => _t('pricePerUnit');
+  String get priceHint => _t('priceHint');
+  String get addedBy => _t('addedBy');
+  String get addedByHint => _t('addedByHint');
   String get low => _t('low');
   String get filteredEmptyTitle => _t('filteredEmptyTitle');
   String get warehouseEmptyTitle => _t('warehouseEmptyTitle');
@@ -239,6 +252,47 @@ class S {
   String attendanceRatio(int present, int total) =>
       _f('attendanceRatio', {'present': present, 'total': total});
   String get confirmOk => _t('confirmOk');
+
+  // ─── Orders ─────────────────────────────────────────────────────────────────
+  String get orders => _t('orders');
+  String get ordersOverview => _t('ordersOverview');
+  String get ordersEmpty => _t('ordersEmpty');
+  String get ordersEmptyHint => _t('ordersEmptyHint');
+  String get newOrder => _t('newOrder');
+  String get orderProductHint => _t('orderProductHint');
+  String get orderQtyHint => _t('orderQtyHint');
+  String get orderDeadlineLabel => _t('orderDeadlineLabel');
+  String get orderPickDeadline => _t('orderPickDeadline');
+  String get orderNoteHint => _t('orderNoteHint');
+  String get addOrder => _t('addOrder');
+  String orderProgress(int produced, int ordered) =>
+      _f('orderProgress', {'produced': produced, 'ordered': ordered});
+  String orderRemaining(int count) =>
+      _f('orderRemaining', {'count': count});
+  String orderDaysLeft(int days) =>
+      _f('orderDaysLeft', {'days': days});
+  String get orderOverdue => _t('orderOverdue');
+  String get orderDone => _t('orderDone');
+  String get openOrders => _t('openOrders');
+
+  // ─── Attendance date filter ──────────────────────────────────────────────────
+  String get dateFilterToday => _t('dateFilterToday');
+  String get dateFilterYesterday => _t('dateFilterYesterday');
+  String get dateFilterSelectDate => _t('dateFilterSelectDate');
+  String get attendanceDateHint => _t('attendanceDateHint');
+  String get produced => _t('produced');
+
+  // ─── Task pricing ────────────────────────────────────────────────────────────
+  String get taskPricePerUnit => _t('taskPricePerUnit');
+  String get taskPriceHint => _t('taskPriceHint');
+  String taskTotalValue(int total) => _f('taskTotalValue', {'total': total});
+  String taskEarnedValue(int earned) =>
+      _f('taskEarnedValue', {'earned': earned});
+
+  // ─── Workers section ─────────────────────────────────────────────────────────
+  String get workersSection => _t('workersSection');
+  String get workersSectionHint => _t('workersSectionHint');
+  String get manageWorkers => _t('manageWorkers');
 }
 
 class _SDelegate extends LocalizationsDelegate<S> {

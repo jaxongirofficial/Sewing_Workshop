@@ -4,12 +4,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../../../config/routes/route_paths.dart';
 import '../../../../core/enums/user_role.dart';
 import '../../../../l10n/s.dart';
 import '../../../../shared/widgets/brand/brand_bottom_bar.dart';
 import '../../../../shared/widgets/brand/brand_dashboard_backdrop.dart';
-import '../../../../shared/widgets/brand/draggable_brand_fab.dart';
 
 /// Yagona brand-dizayndagi shell — har bir rol uchun.
 class RoleShellScaffold extends StatelessWidget {
@@ -82,8 +80,6 @@ class RoleShellScaffold extends StatelessWidget {
     final overlay = isDark
         ? SystemUiOverlayStyle.light.copyWith(statusBarColor: Colors.transparent)
         : SystemUiOverlayStyle.dark.copyWith(statusBarColor: Colors.transparent);
-
-    final topInset = MediaQuery.paddingOf(context).top;
 
     /// Kontent suzuvchi dock ostida kesilmasligi uchun pastdan reserve.
     final dockReserve = bottomInset + 96;
@@ -209,16 +205,6 @@ class RoleShellScaffold extends StatelessWidget {
               items: _items(s, role),
             ),
           ),
-          if (role == UserRole.owner)
-            Positioned.fill(
-              child: DraggableBrandFab(
-                icon: Icons.person_add_alt_1_rounded,
-                tooltip: s.addEmployeeTooltip,
-                onTap: () => context.push(AppRoutes.ownerAddEmployee),
-                bottomReserved: dockReserve - 18,
-                topReserved: topInset + 74 + 8,
-              ),
-            ),
         ],
       ),
     );

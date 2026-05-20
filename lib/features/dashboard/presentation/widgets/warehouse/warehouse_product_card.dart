@@ -14,6 +14,7 @@ class WarehouseProductCard extends StatelessWidget {
     required this.onIncrement,
     required this.onDecrement,
     required this.onDelete,
+    this.onDispatch,
   });
 
   final WarehouseItem item;
@@ -21,6 +22,7 @@ class WarehouseProductCard extends StatelessWidget {
   final VoidCallback onIncrement;
   final VoidCallback onDecrement;
   final VoidCallback onDelete;
+  final VoidCallback? onDispatch;
 
   Color _categoryColor(WarehouseCategory c) => switch (c) {
     WarehouseCategory.clothing => AppColors.brand,
@@ -142,6 +144,48 @@ class WarehouseProductCard extends StatelessWidget {
                       ),
                   ],
                 ),
+                if (item.pricePerUnit != null || item.addedBy != null) ...[
+                  const SizedBox(height: 4),
+                  Row(
+                    children: [
+                      if (item.pricePerUnit != null) ...[
+                        Icon(Icons.sell_outlined,
+                            size: 11,
+                            color: Theme.of(context).colorScheme.onSurfaceVariant),
+                        const SizedBox(width: 3),
+                        Text(
+                          '${item.pricePerUnit!.toStringAsFixed(0)} so\'m',
+                          style: TextStyle(
+                            fontSize: 10,
+                            fontWeight: FontWeight.w600,
+                            color: Theme.of(context).colorScheme.onSurfaceVariant,
+                          ),
+                        ),
+                        if (item.addedBy != null) const SizedBox(width: 8),
+                      ],
+                      if (item.addedBy != null) ...[
+                        Icon(Icons.person_outline_rounded,
+                            size: 11,
+                            color: Theme.of(context).colorScheme.onSurfaceVariant),
+                        const SizedBox(width: 3),
+                        Expanded(
+                          child: Text(
+                            item.addedBy!,
+                            style: TextStyle(
+                              fontSize: 10,
+                              fontWeight: FontWeight.w600,
+                              color: Theme.of(context)
+                                  .colorScheme
+                                  .onSurfaceVariant,
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                      ],
+                    ],
+                  ),
+                ],
               ],
             ),
           ),
@@ -161,7 +205,10 @@ class WarehouseProductCard extends StatelessWidget {
               isLow: isLow,
             ),
           if (canEdit) ...[
-            const SizedBox(width: 8),
+            const SizedBox(width: 6),
+            if (onDispatch != null)
+              _DispatchBtn(onTap: onDispatch!),
+            const SizedBox(width: 6),
             _DeleteBtn(onTap: onDelete),
           ],
         ],
@@ -321,6 +368,31 @@ class _RoundBtn extends StatelessWidget {
           icon,
           size: 16,
           color: active ? scheme.primary : scheme.onSurfaceVariant,
+        ),
+      ),
+    );
+  }
+}
+
+class _DispatchBtn extends StatelessWidget {
+  const _DispatchBtn({required this.onTap});
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        width: 30,
+        height: 30,
+        decoration: BoxDecoration(
+          shape: BoxShape.circle,
+          color: AppColors.warning.withValues(alpha: 0.14),
+        ),
+        child: const Icon(
+          Icons.local_shipping_outlined,
+          size: 15,
+          color: AppColors.warning,
         ),
       ),
     );

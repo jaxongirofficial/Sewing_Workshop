@@ -56,7 +56,7 @@ class TaskAssignForm extends StatelessWidget {
           const SizedBox(height: 18),
           BrandTextField(
             controller: titleCtrl,
-            hintText: s.taskInputHint,
+            hintText: s.taskProductHint,
             prefixIcon: Icons.edit_note_rounded,
             textCapitalization: TextCapitalization.sentences,
           ),

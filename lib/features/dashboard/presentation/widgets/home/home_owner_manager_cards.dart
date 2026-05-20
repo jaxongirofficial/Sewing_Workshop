@@ -10,7 +10,6 @@ class HomeOwnerManagerCards extends StatelessWidget {
     super.key,
     required this.attendance,
     required this.tasks,
-    required this.totalWorkers,
     required this.onOpenAttendance,
     required this.onOpenTasks,
     required this.onOpenWorkers,
@@ -18,7 +17,6 @@ class HomeOwnerManagerCards extends StatelessWidget {
 
   final List<PersonAttendance> attendance;
   final List<WorkshopTaskItem> tasks;
-  final int totalWorkers;
   final VoidCallback onOpenAttendance;
   final VoidCallback onOpenTasks;
   final VoidCallback onOpenWorkers;
@@ -29,6 +27,7 @@ class HomeOwnerManagerCards extends StatelessWidget {
     final present = attendance.where((e) => e.present).length;
     final total = attendance.isEmpty ? 1 : attendance.length;
     final percent = ((present / total) * 100).round();
+    final activeTasks = tasks.where((t) => !t.isDone).length;
 
     return LayoutBuilder(
       builder: (context, constraints) {
@@ -64,7 +63,7 @@ class HomeOwnerManagerCards extends StatelessWidget {
                   child: BrandDashboardHubCard(
                     icon: Icons.work_rounded,
                     label: s.tasks,
-                    value: '${tasks.length}',
+                    value: '$activeTasks',
                     caption: s.activeRecords,
                     chipLabel: s.active,
                     chipIcon: Icons.bolt_rounded,
@@ -73,21 +72,6 @@ class HomeOwnerManagerCards extends StatelessWidget {
                   ),
                 ),
               ],
-            ),
-            const SizedBox(height: gap),
-            SizedBox(
-              width: double.infinity,
-              child: BrandDashboardHubCard(
-                fullWidth: true,
-                icon: Icons.groups_2_rounded,
-                label: s.team,
-                value: '$totalWorkers',
-                caption: s.workersList,
-                chipLabel: s.workersCount(totalWorkers),
-                chipIcon: Icons.people_alt_rounded,
-                actionLabel: s.openTeamList,
-                onTap: onOpenWorkers,
-              ),
             ),
           ],
         );

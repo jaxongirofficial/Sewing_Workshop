@@ -23,6 +23,8 @@ class _WarehouseAddItemSheetState extends ConsumerState<WarehouseAddItemSheet> {
   final _nameCtrl = TextEditingController();
   final _qtyCtrl = TextEditingController(text: '1');
   final _unitCtrl = TextEditingController();
+  final _priceCtrl = TextEditingController();
+  final _addedByCtrl = TextEditingController();
   WarehouseCategory _cat = WarehouseCategory.clothing;
 
   @override
@@ -30,18 +32,24 @@ class _WarehouseAddItemSheetState extends ConsumerState<WarehouseAddItemSheet> {
     _nameCtrl.dispose();
     _qtyCtrl.dispose();
     _unitCtrl.dispose();
+    _priceCtrl.dispose();
+    _addedByCtrl.dispose();
     super.dispose();
   }
 
   void _submit() {
     if (!_formKey.currentState!.validate()) return;
     final qty = int.tryParse(_qtyCtrl.text.trim()) ?? 1;
+    final price = double.tryParse(_priceCtrl.text.trim());
+    final addedBy = _addedByCtrl.text.trim();
     final item = WarehouseItem(
       id: 'w-${DateTime.now().millisecondsSinceEpoch}',
       name: _nameCtrl.text.trim(),
       quantity: qty,
       unit: _unitCtrl.text.trim().isEmpty ? 'ta' : _unitCtrl.text.trim(),
       category: _cat,
+      pricePerUnit: price,
+      addedBy: addedBy.isEmpty ? null : addedBy,
     );
     widget.onAdd(item);
   }
@@ -128,6 +136,28 @@ class _WarehouseAddItemSheetState extends ConsumerState<WarehouseAddItemSheet> {
                         controller: _unitCtrl,
                         hintText: s.unitHint,
                         prefixIcon: Icons.straighten_rounded,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 12),
+                Row(
+                  children: [
+                    Expanded(
+                      child: BrandTextField(
+                        controller: _priceCtrl,
+                        hintText: s.priceHint,
+                        prefixIcon: Icons.sell_outlined,
+                        keyboardType: const TextInputType.numberWithOptions(
+                            decimal: true),
+                      ),
+                    ),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: BrandTextField(
+                        controller: _addedByCtrl,
+                        hintText: s.addedByHint,
+                        prefixIcon: Icons.person_outline_rounded,
                       ),
                     ),
                   ],

@@ -7,6 +7,8 @@ String _hhmmNow() {
   return '${n.hour.toString().padLeft(2, '0')}:${n.minute.toString().padLeft(2, '0')}';
 }
 
+// ─── Attendance ───────────────────────────────────────────────────────────────
+
 final class AttendanceNotifier extends StateNotifier<List<PersonAttendance>> {
   AttendanceNotifier() : super(_seed);
 
@@ -55,7 +57,6 @@ final class AttendanceNotifier extends StateNotifier<List<PersonAttendance>> {
     ];
   }
 
-  /// Yangi xodim qo'shilganda davomat ro'yxatiga ham qo'shiladi.
   void addIfMissing({required String id, required String name}) {
     if (state.any((p) => p.id == id)) return;
     state = [
@@ -70,42 +71,89 @@ final attendanceProvider =
   return AttendanceNotifier();
 });
 
+// ─── Tasks ────────────────────────────────────────────────────────────────────
+
 final class TasksNotifier extends StateNotifier<List<WorkshopTaskItem>> {
   TasksNotifier() : super(_seed);
 
+  static final _now = DateTime.now();
+
   static final _seed = <WorkshopTaskItem>[
-    const WorkshopTaskItem(
+    WorkshopTaskItem(
       id: 't-1',
-      title: 'B — liniya: 120 ta ko\'ylak tikish',
+      productName: 'Ko\'ylak',
+      targetQty: 120,
+      doneQty: 45,
       assigneeId: 'user-worker-1',
       assigneeName: 'Javlon Toshmatov',
+      deadline: _now.add(const Duration(days: 5)),
+      pricePerUnit: 8000,
     ),
-    const WorkshopTaskItem(
+    WorkshopTaskItem(
       id: 't-2',
-      title: 'QC: export partiya tekshiruvi',
+      productName: 'Shim',
+      targetQty: 80,
+      doneQty: 80,
       assigneeId: 'w-4',
       assigneeName: 'Dilnoza Ergasheva',
+      deadline: _now.subtract(const Duration(days: 1)),
+      pricePerUnit: 10000,
+    ),
+    WorkshopTaskItem(
+      id: 't-3',
+      productName: 'Jaket',
+      targetQty: 50,
+      doneQty: 12,
+      assigneeId: 'w-2',
+      assigneeName: 'Nilufar Karimova',
+      deadline: _now.add(const Duration(days: 2)),
+      pricePerUnit: 15000,
     ),
   ];
 
   void assign({
-    required String title,
+    required String productName,
+    required int targetQty,
     required String assigneeId,
     required String assigneeName,
+    DateTime? deadline,
+    String? note,
+    double? pricePerUnit,
   }) {
-    final t = title.trim();
-    if (t.isEmpty) return;
+    final name = productName.trim();
+    if (name.isEmpty || targetQty <= 0) return;
     final id = 't-${DateTime.now().millisecondsSinceEpoch}';
     state = [
       WorkshopTaskItem(
         id: id,
-        title: t,
+        productName: name,
+        targetQty: targetQty,
         assigneeId: assigneeId,
         assigneeName: assigneeName,
+        deadline: deadline,
+        note: note,
+        pricePerUnit: pricePerUnit,
       ),
       ...state,
     ];
   }
+
+  void updateProgress(String id, int newDone) {
+    state = [
+      for (final t in state)
+        if (t.id == id) t.copyWith(doneQty: newDone.clamp(0, t.targetQty))
+        else t,
+    ];
+  }
+
+  void update(WorkshopTaskItem updated) {
+    state = [
+      for (final t in state) if (t.id == updated.id) updated else t,
+    ];
+  }
+
+  void delete(String id) =>
+      state = state.where((t) => t.id != id).toList();
 }
 
 final tasksProvider =
@@ -125,6 +173,8 @@ final class WarehouseNotifier extends StateNotifier<List<WarehouseItem>> {
       quantity: 7,
       unit: 'ta',
       category: WarehouseCategory.clothing,
+      pricePerUnit: 45000,
+      addedBy: 'Sherzod M.',
     ),
     const WarehouseItem(
       id: 'w-2',
@@ -132,6 +182,8 @@ final class WarehouseNotifier extends StateNotifier<List<WarehouseItem>> {
       quantity: 15,
       unit: 'ta',
       category: WarehouseCategory.clothing,
+      pricePerUnit: 38000,
+      addedBy: 'Sherzod M.',
     ),
     const WarehouseItem(
       id: 'w-3',
@@ -146,6 +198,7 @@ final class WarehouseNotifier extends StateNotifier<List<WarehouseItem>> {
       quantity: 12,
       unit: 'ta',
       category: WarehouseCategory.clothing,
+      pricePerUnit: 32000,
     ),
     const WarehouseItem(
       id: 'w-5',
@@ -153,6 +206,8 @@ final class WarehouseNotifier extends StateNotifier<List<WarehouseItem>> {
       quantity: 5,
       unit: 'ta',
       category: WarehouseCategory.clothing,
+      pricePerUnit: 95000,
+      addedBy: 'Nilufar K.',
     ),
     const WarehouseItem(
       id: 'w-6',
@@ -160,6 +215,7 @@ final class WarehouseNotifier extends StateNotifier<List<WarehouseItem>> {
       quantity: 30,
       unit: 'ta',
       category: WarehouseCategory.accessory,
+      pricePerUnit: 22000,
     ),
     const WarehouseItem(
       id: 'w-7',
@@ -174,6 +230,8 @@ final class WarehouseNotifier extends StateNotifier<List<WarehouseItem>> {
       quantity: 150,
       unit: 'metr',
       category: WarehouseCategory.material,
+      pricePerUnit: 8500,
+      addedBy: 'Sherzod M.',
     ),
     const WarehouseItem(
       id: 'w-9',
@@ -181,6 +239,7 @@ final class WarehouseNotifier extends StateNotifier<List<WarehouseItem>> {
       quantity: 40,
       unit: 'dona',
       category: WarehouseCategory.material,
+      pricePerUnit: 3200,
     ),
     const WarehouseItem(
       id: 'w-10',
@@ -188,6 +247,7 @@ final class WarehouseNotifier extends StateNotifier<List<WarehouseItem>> {
       quantity: 500,
       unit: 'dona',
       category: WarehouseCategory.material,
+      pricePerUnit: 150,
     ),
   ];
 
@@ -203,6 +263,23 @@ final class WarehouseNotifier extends StateNotifier<List<WarehouseItem>> {
     ];
   }
 
+  /// Chiqarish (otpravka) — miqdorni kamaytiradi.
+  void dispatch(String id, int qty) {
+    state = [
+      for (final item in state)
+        if (item.id == id)
+          item.copyWith(quantity: (item.quantity - qty).clamp(0, 99999))
+        else
+          item,
+    ];
+  }
+
+  void update(WarehouseItem updated) {
+    state = [
+      for (final item in state) if (item.id == updated.id) updated else item,
+    ];
+  }
+
   void remove(String id) => state = state.where((e) => e.id != id).toList();
 }
 
@@ -211,7 +288,7 @@ final warehouseProvider =
   return WarehouseNotifier();
 });
 
-// ─── Employees (xodimlar) ─────────────────────────────────────────────────────
+// ─── Employees ────────────────────────────────────────────────────────────────
 
 final class EmployeesNotifier extends StateNotifier<List<Employee>> {
   EmployeesNotifier() : super(_seed);
@@ -275,4 +352,58 @@ final workshopWorkersProvider = Provider<List<WorkshopWorker>>((ref) {
   final attendance = ref.watch(attendanceProvider);
   final employees = ref.watch(employeesProvider);
   return buildWorkshopWorkers(attendance, employees);
+});
+
+// ─── Orders (Zakazlar) ────────────────────────────────────────────────────────
+
+final class OrdersNotifier extends StateNotifier<List<WorkshopOrder>> {
+  OrdersNotifier() : super(_seed);
+
+  static final _now = DateTime.now();
+
+  static final _seed = <WorkshopOrder>[
+    WorkshopOrder(
+      id: 'o-1',
+      productName: 'Ko\'ylak',
+      orderedQty: 500,
+      producedQty: 245,
+      deadline: _now.add(const Duration(days: 8)),
+    ),
+    WorkshopOrder(
+      id: 'o-2',
+      productName: 'Shim',
+      orderedQty: 300,
+      producedQty: 295,
+      deadline: _now.add(const Duration(days: 2)),
+    ),
+    WorkshopOrder(
+      id: 'o-3',
+      productName: 'Jaket',
+      orderedQty: 150,
+      producedQty: 12,
+      deadline: _now.subtract(const Duration(days: 1)),
+    ),
+  ];
+
+  void add(WorkshopOrder order) => state = [order, ...state];
+
+  void updateProduced(String id, int newProduced) {
+    state = [
+      for (final o in state)
+        if (o.id == id)
+          o.copyWith(
+            producedQty: newProduced.clamp(0, o.orderedQty),
+          )
+        else
+          o,
+    ];
+  }
+
+  void delete(String id) =>
+      state = state.where((o) => o.id != id).toList();
+}
+
+final ordersProvider =
+    StateNotifierProvider<OrdersNotifier, List<WorkshopOrder>>((ref) {
+  return OrdersNotifier();
 });

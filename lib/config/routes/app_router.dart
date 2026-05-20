@@ -306,7 +306,7 @@ final goRouterProvider = Provider<GoRouter>((ref) {
         parentNavigatorKey: rootNavigatorKey,
         pageBuilder: (context, state) => MaterialPage<void>(
           key: state.pageKey,
-          child: const WorkersListPage(),
+          child: const WorkersListPage(role: UserRole.owner),
         ),
       ),
       GoRoute(
@@ -314,7 +314,7 @@ final goRouterProvider = Provider<GoRouter>((ref) {
         parentNavigatorKey: rootNavigatorKey,
         pageBuilder: (context, state) => MaterialPage<void>(
           key: state.pageKey,
-          child: const WorkersListPage(),
+          child: const WorkersListPage(role: UserRole.manager),
         ),
       ),
     ],
