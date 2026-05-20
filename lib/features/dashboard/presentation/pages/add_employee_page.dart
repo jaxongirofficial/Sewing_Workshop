@@ -1,17 +1,18 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../config/theme/app_colors.dart';
-import '../../../../config/theme/app_radius.dart';
 import '../../../../core/utils/uzbek_phone_input_formatter.dart';
 import '../../../../l10n/s.dart';
 import '../../../../shared/widgets/brand/brand_dashboard_backdrop.dart';
 import '../../../../shared/widgets/brand/brand_primary_button.dart';
-import '../../../../shared/widgets/brand/brand_surface.dart';
 import '../../../../shared/widgets/brand/brand_text_field.dart';
 import '../models/workshop_mock_models.dart';
 import '../providers/workshop_mock_providers.dart';
+import '../widgets/add_employee/add_employee_birth_date_field.dart';
+import '../widgets/add_employee/add_employee_header_hero.dart';
+import '../widgets/add_employee/add_employee_role_chip.dart';
+import '../widgets/add_employee/add_employee_section.dart';
 
 /// Owner uchun yangi xodim qo'shish sahifasi (modal route).
 class AddEmployeePage extends ConsumerStatefulWidget {
@@ -150,9 +151,12 @@ class _AddEmployeePageState extends ConsumerState<AddEmployeePage> {
               child: ListView(
                 padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
                 children: [
-                  _HeaderHero(title: s.expandTeam, hint: s.expandTeamHint),
+                  AddEmployeeHeaderHero(
+                    title: s.expandTeam,
+                    hint: s.expandTeamHint,
+                  ),
                   const SizedBox(height: 16),
-                  _Section(
+                  AddEmployeeSection(
                     title: s.personalInfo,
                     child: Column(
                       children: [
@@ -162,10 +166,9 @@ class _AddEmployeePageState extends ConsumerState<AddEmployeePage> {
                           prefixIcon: Icons.person_outline_rounded,
                           textCapitalization: TextCapitalization.words,
                           textInputAction: TextInputAction.next,
-                          validator: (v) =>
-                              (v == null || v.trim().length < 2)
-                                  ? s.firstNameRequired
-                                  : null,
+                          validator: (v) => (v == null || v.trim().length < 2)
+                              ? s.firstNameRequired
+                              : null,
                         ),
                         const SizedBox(height: 12),
                         BrandTextField(
@@ -174,13 +177,12 @@ class _AddEmployeePageState extends ConsumerState<AddEmployeePage> {
                           prefixIcon: Icons.badge_outlined,
                           textCapitalization: TextCapitalization.words,
                           textInputAction: TextInputAction.next,
-                          validator: (v) =>
-                              (v == null || v.trim().length < 2)
-                                  ? s.lastNameRequired
-                                  : null,
+                          validator: (v) => (v == null || v.trim().length < 2)
+                              ? s.lastNameRequired
+                              : null,
                         ),
                         const SizedBox(height: 12),
-                        _BirthDateField(
+                        AddEmployeeBirthDateField(
                           value: _birthDate,
                           label: _birthDate == null
                               ? s.birthDate
@@ -191,12 +193,12 @@ class _AddEmployeePageState extends ConsumerState<AddEmployeePage> {
                     ),
                   ),
                   const SizedBox(height: 14),
-                  _Section(
+                  AddEmployeeSection(
                     title: s.rolePosition,
                     child: Row(
                       children: [
                         Expanded(
-                          child: _RoleChip(
+                          child: AddEmployeeRoleChip(
                             icon: Icons.work_rounded,
                             label: s.roleTailor,
                             description: s.roleTailorHint,
@@ -206,7 +208,7 @@ class _AddEmployeePageState extends ConsumerState<AddEmployeePage> {
                         ),
                         const SizedBox(width: 10),
                         Expanded(
-                          child: _RoleChip(
+                          child: AddEmployeeRoleChip(
                             icon: Icons.supervisor_account_rounded,
                             label: s.roleManager,
                             description: s.roleManagerHint,
@@ -218,7 +220,7 @@ class _AddEmployeePageState extends ConsumerState<AddEmployeePage> {
                     ),
                   ),
                   const SizedBox(height: 14),
-                  _Section(
+                  AddEmployeeSection(
                     title: s.loginInfo,
                     child: Column(
                       children: [
@@ -230,8 +232,8 @@ class _AddEmployeePageState extends ConsumerState<AddEmployeePage> {
                           textInputAction: TextInputAction.next,
                           inputFormatters: [UzbekPhoneInputFormatter()],
                           validator: (v) {
-                            final digits = (v ?? '')
-                                .replaceAll(RegExp(r'\D'), '');
+                            final digits =
+                                (v ?? '').replaceAll(RegExp(r'\D'), '');
                             if (digits.length != 12) {
                               return s.phoneIncomplete;
                             }
@@ -316,317 +318,6 @@ class _AddEmployeePageState extends ConsumerState<AddEmployeePage> {
           ),
         ),
       ],
-    );
-  }
-}
-
-// ─── Header hero card ────────────────────────────────────────────────────────
-
-class _HeaderHero extends StatelessWidget {
-  const _HeaderHero({required this.title, required this.hint});
-
-  final String title;
-  final String hint;
-
-  @override
-  Widget build(BuildContext context) {
-    final scheme = Theme.of(context).colorScheme;
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final textTheme = Theme.of(context).textTheme;
-
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(AppRadius.lg),
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [
-            scheme.primary,
-            Color.lerp(scheme.primary, Colors.black, isDark ? 0.12 : 0.24)!,
-          ],
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: scheme.primary.withValues(alpha: 0.40),
-            blurRadius: 22,
-            offset: const Offset(0, 10),
-            spreadRadius: -8,
-          ),
-        ],
-      ),
-      child: Row(
-        children: [
-          Container(
-            width: 54,
-            height: 54,
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              color: Colors.white.withValues(alpha: 0.18),
-              border: Border.all(
-                color: Colors.white.withValues(alpha: 0.35),
-                width: 1.5,
-              ),
-            ),
-            child: const Icon(
-              Icons.person_add_alt_1_rounded,
-              color: Colors.white,
-              size: 28,
-            ),
-          ),
-          const SizedBox(width: 14),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(
-                  title,
-                  style: textTheme.titleMedium?.copyWith(
-                    color: Colors.white,
-                    fontWeight: FontWeight.w800,
-                    letterSpacing: -0.3,
-                  ),
-                ),
-                const SizedBox(height: 2),
-                Text(
-                  hint,
-                  style: textTheme.bodySmall?.copyWith(
-                    color: Colors.white.withValues(alpha: 0.86),
-                    fontWeight: FontWeight.w500,
-                    height: 1.3,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-// ─── Section ─────────────────────────────────────────────────────────────────
-
-class _Section extends StatelessWidget {
-  const _Section({required this.title, required this.child});
-  final String title;
-  final Widget child;
-
-  @override
-  Widget build(BuildContext context) {
-    final scheme = Theme.of(context).colorScheme;
-    final textTheme = Theme.of(context).textTheme;
-
-    return BrandSurface(
-      solid: true,
-      padding: const EdgeInsets.all(14),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Padding(
-            padding: const EdgeInsets.only(left: 4, bottom: 10),
-            child: Text(
-              title,
-              style: textTheme.labelLarge?.copyWith(
-                fontWeight: FontWeight.w800,
-                color: scheme.onSurfaceVariant,
-                letterSpacing: 0.2,
-              ),
-            ),
-          ),
-          child,
-        ],
-      ),
-    );
-  }
-}
-
-// ─── Birthdate selector ──────────────────────────────────────────────────────
-
-class _BirthDateField extends StatelessWidget {
-  const _BirthDateField({
-    required this.value,
-    required this.label,
-    required this.onTap,
-  });
-
-  final DateTime? value;
-  final String label;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    final scheme = Theme.of(context).colorScheme;
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final hasValue = value != null;
-
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(AppRadius.md),
-        child: Container(
-          height: 60,
-          padding: const EdgeInsets.symmetric(horizontal: 14),
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(AppRadius.md),
-            color: isDark
-                ? scheme.surfaceContainerHigh
-                : Colors.white,
-            border: Border.all(
-              color: scheme.outline.withValues(alpha: 0.6),
-            ),
-          ),
-          child: Row(
-            children: [
-              Icon(
-                Icons.cake_rounded,
-                color: scheme.onSurfaceVariant.withValues(alpha: 0.8),
-                size: 22,
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Text(
-                  label,
-                  style: TextStyle(
-                    color: hasValue
-                        ? scheme.onSurface
-                        : scheme.onSurfaceVariant.withValues(alpha: 0.65),
-                    fontWeight: hasValue ? FontWeight.w700 : FontWeight.w500,
-                    fontSize: 15,
-                  ),
-                ),
-              ),
-              Icon(
-                Icons.calendar_month_rounded,
-                color: scheme.primary,
-                size: 22,
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-// ─── Role chip ───────────────────────────────────────────────────────────────
-
-class _RoleChip extends StatelessWidget {
-  const _RoleChip({
-    required this.icon,
-    required this.label,
-    required this.description,
-    required this.selected,
-    required this.onTap,
-  });
-
-  final IconData icon;
-  final String label;
-  final String description;
-  final bool selected;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    final scheme = Theme.of(context).colorScheme;
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final textTheme = Theme.of(context).textTheme;
-
-    return GestureDetector(
-      onTap: () {
-        HapticFeedback.selectionClick();
-        onTap();
-      },
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 200),
-        padding: const EdgeInsets.all(12),
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(AppRadius.md),
-          gradient: selected
-              ? LinearGradient(
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                  colors: [
-                    scheme.primary.withValues(alpha: isDark ? 0.25 : 0.14),
-                    scheme.primary.withValues(alpha: isDark ? 0.12 : 0.06),
-                  ],
-                )
-              : null,
-          color: selected
-              ? null
-              : (isDark
-                  ? AppColors.darkCardHigh
-                  : const Color(0xFFF4F7FC)),
-          border: Border.all(
-            color: selected
-                ? scheme.primary
-                : (isDark
-                    ? AppColors.darkBorder
-                    : const Color(0xFFE2E8F0)),
-            width: selected ? 1.6 : 1,
-          ),
-          boxShadow: selected
-              ? [
-                  BoxShadow(
-                    color: scheme.primary.withValues(alpha: 0.25),
-                    blurRadius: 12,
-                    offset: const Offset(0, 6),
-                    spreadRadius: -6,
-                  ),
-                ]
-              : null,
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Container(
-              width: 36,
-              height: 36,
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(10),
-                gradient: selected
-                    ? LinearGradient(
-                        colors: [
-                          scheme.primary,
-                          Color.lerp(
-                              scheme.primary, Colors.black, 0.18)!,
-                        ],
-                      )
-                    : null,
-                color: selected
-                    ? null
-                    : scheme.primary.withValues(alpha: 0.12),
-              ),
-              child: Icon(
-                icon,
-                color: selected ? Colors.white : scheme.primary,
-                size: 20,
-              ),
-            ),
-            const SizedBox(height: 10),
-            Text(
-              label,
-              style: textTheme.titleSmall?.copyWith(
-                fontWeight: FontWeight.w800,
-                color: selected ? scheme.primary : scheme.onSurface,
-              ),
-            ),
-            const SizedBox(height: 2),
-            Text(
-              description,
-              style: textTheme.bodySmall?.copyWith(
-                color: scheme.onSurfaceVariant,
-                fontSize: 11,
-                height: 1.3,
-              ),
-            ),
-          ],
-        ),
-      ),
     );
   }
 }
