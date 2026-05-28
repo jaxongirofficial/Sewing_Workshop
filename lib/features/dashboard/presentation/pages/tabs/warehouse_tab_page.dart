@@ -1,20 +1,22 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../../../config/theme/app_colors.dart';
-import '../../../../../config/theme/app_radius.dart';
 import '../../../../../core/enums/user_role.dart';
 import '../../../../../l10n/s.dart';
+import '../../../../auth/presentation/providers/auth_notifier.dart';
 import '../../../../../shared/widgets/brand/brand_scrollable_sheet.dart';
 import '../../models/workshop_mock_models.dart';
 import '../../providers/workshop_mock_providers.dart';
-import '../../widgets/warehouse/warehouse_add_button.dart';
+import '../warehouse_history_page.dart';
+import '../warehouse_product_detail_page.dart';
 import '../../widgets/warehouse/warehouse_add_item_sheet.dart';
+import '../../widgets/warehouse/warehouse_dispatch_sheet.dart';
+import '../../widgets/warehouse/warehouse_quick_actions.dart';
 import '../../widgets/warehouse/warehouse_category_filter.dart';
 import '../../widgets/warehouse/warehouse_empty_state.dart';
 import '../../widgets/warehouse/warehouse_labels.dart';
-import '../../widgets/warehouse/warehouse_product_card.dart';
-import '../../widgets/warehouse/warehouse_summary_row.dart';
+import '../../widgets/warehouse/warehouse_overview_header.dart';
+import '../../widgets/warehouse/warehouse_product_tile.dart';
 
 class WarehouseTabPage extends ConsumerStatefulWidget {
   const WarehouseTabPage({super.key, required this.role});
@@ -31,8 +33,28 @@ class _WarehouseTabPageState extends ConsumerState<WarehouseTabPage> {
   bool get _canEdit =>
       widget.role == UserRole.owner || widget.role == UserRole.manager;
 
+  String _performedBy() {
+    final user = ref.read(authNotifierProvider).user;
+    final name = user?.displayName.trim();
+    if (name != null && name.isNotEmpty) return name;
+    return '—';
+  }
+
+  void _openProductDetail(WarehouseItem item) {
+    Navigator.of(context, rootNavigator: true).push(
+      MaterialPageRoute<void>(
+        builder: (_) => WarehouseProductDetailPage(
+          itemId: item.id,
+          canEdit: _canEdit,
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
+    final s = S.of(context);
+    final textTheme = Theme.of(context).textTheme;
     final items = ref.watch(warehouseProvider);
 
     final filtered = _selectedCategory == null
@@ -40,57 +62,58 @@ class _WarehouseTabPageState extends ConsumerState<WarehouseTabPage> {
         : items.where((e) => e.category == _selectedCategory).toList();
 
     final totalItems = items.fold<int>(0, (acc, e) => acc + e.quantity);
-    final categoryCount = WarehouseCategory.values
-        .where((c) => items.any((e) => e.category == c))
-        .length;
 
     return ListView(
       padding: const EdgeInsets.fromLTRB(16, 12, 16, 24),
       children: [
-        WarehouseSummaryRow(
-          totalItems: totalItems,
-          productTypes: items.length,
-          categories: categoryCount,
+        WarehouseOverviewHeader(
+          totalPieces: totalItems,
+          productCount: items.length,
+          onOpenHistory: () {
+            Navigator.of(context, rootNavigator: true).push(
+              MaterialPageRoute<void>(
+                builder: (_) => const WarehouseHistoryPage(),
+              ),
+            );
+          },
         ),
+        if (_canEdit) ...[
+          const SizedBox(height: 14),
+          WarehouseQuickActions(
+            onAdd: () => _showAddSheet(context),
+            onDispatch: () => _showDispatchPickerSheet(context, items),
+          ),
+        ],
         const SizedBox(height: 16),
         WarehouseCategoryFilter(
           selected: _selectedCategory,
           onSelect: (c) => setState(() => _selectedCategory = c),
         ),
-        if (_canEdit) ...[
-          const SizedBox(height: 14),
-          Row(
-            children: [
-              Expanded(
-                child: WarehouseAddButton(
-                    onTap: () => _showAddSheet(context)),
+        const SizedBox(height: 12),
+        Row(
+          children: [
+            Text(
+              s.warehouseStockList,
+              style: textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w800),
+            ),
+            const Spacer(),
+            Text(
+              s.warehouseInStockCount(filtered.length),
+              style: textTheme.labelSmall?.copyWith(
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
+                fontWeight: FontWeight.w600,
               ),
-              const SizedBox(width: 10),
-              Expanded(
-                child: _DispatchAllButton(
-                    onTap: () => _showDispatchPickerSheet(context, items)),
-              ),
-            ],
-          ),
-        ],
-        const SizedBox(height: 14),
+            ),
+          ],
+        ),
+        const SizedBox(height: 10),
         if (filtered.isEmpty)
           WarehouseEmptyState(filtered: _selectedCategory != null)
         else
           for (final item in filtered) ...[
-            WarehouseProductCard(
+            WarehouseProductTile(
               item: item,
-              canEdit: _canEdit,
-              onIncrement: () => ref
-                  .read(warehouseProvider.notifier)
-                  .updateQuantity(item.id, 1),
-              onDecrement: () => ref
-                  .read(warehouseProvider.notifier)
-                  .updateQuantity(item.id, -1),
-              onDelete: () => _confirmDelete(context, item),
-              onDispatch: _canEdit
-                  ? () => _showDispatchSheet(context, item)
-                  : null,
+              onTap: () => _openProductDetail(item),
             ),
             const SizedBox(height: 10),
           ],
@@ -98,54 +121,18 @@ class _WarehouseTabPageState extends ConsumerState<WarehouseTabPage> {
     );
   }
 
-  Future<void> _confirmDelete(BuildContext context, WarehouseItem item) async {
-    final scheme = Theme.of(context).colorScheme;
-    final s = S.of(context);
-    final confirmed = await showDialog<bool>(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(AppRadius.xl),
-        ),
-        title: Text(s.deleteConfirmTitle),
-        content: Text(
-          s.deleteWarehouseItemMessage(warehouseItemName(item, s)),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(ctx).pop(false),
-            child: Text(
-              s.cancel,
-              style: TextStyle(color: scheme.onSurfaceVariant),
-            ),
-          ),
-          FilledButton(
-            style: FilledButton.styleFrom(
-              backgroundColor: AppColors.danger,
-              foregroundColor: Colors.white,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(AppRadius.sm),
-              ),
-            ),
-            onPressed: () => Navigator.of(ctx).pop(true),
-            child: Text(s.delete),
-          ),
-        ],
-      ),
-    );
-    if (confirmed == true) {
-      ref.read(warehouseProvider.notifier).remove(item.id);
-    }
-  }
-
   Future<void> _showAddSheet(BuildContext context) async {
+    final actor = _performedBy();
     await showModalBottomSheet<void>(
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
       builder: (sheetCtx) => WarehouseAddItemSheet(
         onAdd: (item) {
-          ref.read(warehouseProvider.notifier).add(item);
+          ref.read(warehouseProvider.notifier).add(
+                item,
+                performedBy: item.addedBy ?? actor,
+              );
           Navigator.of(sheetCtx).pop();
         },
       ),
@@ -154,15 +141,20 @@ class _WarehouseTabPageState extends ConsumerState<WarehouseTabPage> {
 
   Future<void> _showDispatchSheet(
       BuildContext context, WarehouseItem item) async {
+    final actor = _performedBy();
     await showModalBottomSheet<void>(
       context: context,
       isScrollControlled: true,
       useSafeArea: true,
       backgroundColor: Colors.transparent,
-      builder: (_) => _DispatchSheet(
+      builder: (_) => WarehouseDispatchSheet(
         item: item,
         onDispatch: (qty) {
-          ref.read(warehouseProvider.notifier).dispatch(item.id, qty);
+          ref.read(warehouseProvider.notifier).dispatch(
+                item.id,
+                qty,
+                performedBy: actor,
+              );
           if (context.mounted) {
             final s = S.of(context);
             ScaffoldMessenger.of(context).showSnackBar(
@@ -193,59 +185,6 @@ class _WarehouseTabPageState extends ConsumerState<WarehouseTabPage> {
     }
   }
 }
-
-// ─── Dispatch All button ──────────────────────────────────────────────────────
-
-class _DispatchAllButton extends StatelessWidget {
-  const _DispatchAllButton({required this.onTap});
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    final s = S.of(context);
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(AppRadius.md),
-        child: Container(
-          padding: const EdgeInsets.symmetric(vertical: 14),
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(AppRadius.md),
-            color: AppColors.warning.withValues(alpha: isDark ? 0.2 : 0.12),
-            border: Border.all(
-              color:
-                  AppColors.warning.withValues(alpha: isDark ? 0.5 : 0.35),
-            ),
-          ),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(Icons.local_shipping_outlined,
-                  size: 18, color: AppColors.warning),
-              const SizedBox(width: 8),
-              Flexible(
-                child: Text(
-                  s.dispatchProduct,
-                  style: TextStyle(
-                    color: AppColors.warning,
-                    fontWeight: FontWeight.w700,
-                    fontSize: 13,
-                  ),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-// ─── Item Picker Sheet ────────────────────────────────────────────────────────
 
 class _ItemPickerSheet extends StatelessWidget {
   const _ItemPickerSheet({required this.items});
@@ -283,104 +222,6 @@ class _ItemPickerSheet extends StatelessWidget {
                     style: TextStyle(color: scheme.onSurfaceVariant)),
                 trailing: const Icon(Icons.chevron_right_rounded),
                 onTap: () => Navigator.pop(context, item),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-// ─── Dispatch Sheet ───────────────────────────────────────────────────────────
-
-class _DispatchSheet extends StatefulWidget {
-  const _DispatchSheet({required this.item, required this.onDispatch});
-  final WarehouseItem item;
-  final ValueChanged<int> onDispatch;
-
-  @override
-  State<_DispatchSheet> createState() => _DispatchSheetState();
-}
-
-class _DispatchSheetState extends State<_DispatchSheet> {
-  final _ctrl = TextEditingController();
-
-  @override
-  void dispose() {
-    _ctrl.dispose();
-    super.dispose();
-  }
-
-  void _submit() {
-    final n = int.tryParse(_ctrl.text.trim());
-    if (n == null || n <= 0 || n > widget.item.quantity) return;
-    widget.onDispatch(n);
-    Navigator.pop(context);
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final s = S.of(context);
-    final scheme = Theme.of(context).colorScheme;
-    final textTheme = Theme.of(context).textTheme;
-
-    return BrandScrollableSheet(
-      child: BrandSheetContainer(
-        padding: EdgeInsets.fromLTRB(
-          24,
-          20,
-          24,
-          14 + MediaQuery.viewInsetsOf(context).bottom,
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            const BrandSheetHandle(),
-            const SizedBox(height: 16),
-            Row(
-              children: [
-                const Icon(Icons.local_shipping_outlined, size: 20),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: Text(
-                    s.dispatchProduct,
-                    style: textTheme.titleMedium
-                        ?.copyWith(fontWeight: FontWeight.w800),
-                  ),
-                ),
-              ],
-            ),
-              const SizedBox(height: 4),
-            Text(
-              '${widget.item.name}  •  ${s.totalPieces}: ${widget.item.quantity} ${widget.item.unit}',
-              style: textTheme.bodySmall?.copyWith(
-                color: scheme.onSurfaceVariant,
-              ),
-            ),
-            const SizedBox(height: 16),
-            TextField(
-              controller: _ctrl,
-              keyboardType: TextInputType.number,
-              autofocus: true,
-              decoration: InputDecoration(
-                labelText: s.dispatchQtyHint,
-                suffixText: widget.item.unit,
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(AppRadius.md),
-                ),
-                helperText: '${s.totalPieces}: ${widget.item.quantity}',
-              ),
-            ),
-            const SizedBox(height: 20),
-            FilledButton.icon(
-              onPressed: _submit,
-              icon: const Icon(Icons.local_shipping_outlined, size: 18),
-              label: Text(s.dispatchConfirm),
-              style: FilledButton.styleFrom(
-                backgroundColor: AppColors.warning,
-                foregroundColor: Colors.white,
               ),
             ),
           ],

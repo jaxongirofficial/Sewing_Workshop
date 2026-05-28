@@ -244,6 +244,41 @@ class WarehouseItem {
   }
 }
 
+/// Ombor harakati turi.
+enum WarehouseHistoryType {
+  /// Kirim (yangi mahsulot yoki qo'shimcha).
+  stockIn,
+
+  /// Chiqarish (ishlab chiqarishga / jo'natish).
+  stockOut,
+
+  /// Qo'lda +/- o'zgartirish.
+  adjust,
+}
+
+/// Ombor tarixi — kim, qachon, qancha.
+class WarehouseHistoryEntry {
+  const WarehouseHistoryEntry({
+    required this.id,
+    required this.type,
+    required this.productId,
+    required this.productName,
+    required this.quantity,
+    required this.unit,
+    required this.performedBy,
+    required this.at,
+  });
+
+  final String id;
+  final WarehouseHistoryType type;
+  final String productId;
+  final String productName;
+  final int quantity;
+  final String unit;
+  final String performedBy;
+  final DateTime at;
+}
+
 /// Zakaz — buyurtma modeli.
 class WorkshopOrder {
   const WorkshopOrder({

@@ -31,12 +31,6 @@ class RoleShellScaffold extends StatelessWidget {
     };
   }
 
-  static String _roleSubtitle(S s, UserRole role) => switch (role) {
-        UserRole.owner => s.roleOwner,
-        UserRole.manager => s.roleManager,
-        UserRole.worker => s.roleWorker,
-      };
-
   static List<BrandNavItem> _items(S s, UserRole role) {
     final taskLabel = role == UserRole.worker ? s.myTasks : s.task;
     return [
@@ -141,15 +135,6 @@ class RoleShellScaffold extends StatelessWidget {
                                     ),
                                     maxLines: 1,
                                     overflow: TextOverflow.ellipsis,
-                                  ),
-                                  const SizedBox(height: 2),
-                                  Text(
-                                    _roleSubtitle(s, role),
-                                    style: textTheme.bodySmall?.copyWith(
-                                      color: scheme.onSurfaceVariant,
-                                      fontWeight: FontWeight.w600,
-                                      letterSpacing: 0.2,
-                                    ),
                                   ),
                                 ],
                               ),

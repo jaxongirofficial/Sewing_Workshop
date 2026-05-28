@@ -32,6 +32,10 @@ class S {
         if (!entry.key.startsWith('@') && entry.value is String)
           entry.key: entry.value as String,
     };
+    // Eski build assetlarida yangi kalitlar bo'lmasa — zaxira tarjimalar.
+    for (final entry in _fallbackMessages(languageCode).entries) {
+      messages.putIfAbsent(entry.key, () => entry.value);
+    }
     return S._(Locale(languageCode), messages);
   }
 
@@ -293,6 +297,110 @@ class S {
   String get workersSection => _t('workersSection');
   String get workersSectionHint => _t('workersSectionHint');
   String get manageWorkers => _t('manageWorkers');
+
+  // ─── Warehouse history ───────────────────────────────────────────────────────
+  String get warehouseHistory => _t('warehouseHistory');
+  String get warehouseHistoryHint => _t('warehouseHistoryHint');
+  String get historyAll => _t('historyAll');
+  String get historyStockIn => _t('historyStockIn');
+  String get historyStockOut => _t('historyStockOut');
+  String get historyAdjust => _t('historyAdjust');
+  String get historyEmptyTitle => _t('historyEmptyTitle');
+  String get historyEmptyHint => _t('historyEmptyHint');
+  String historyStockInLine(String who, int qty, String unit, String product) =>
+      _f('historyStockInLine',
+          {'who': who, 'qty': qty, 'unit': unit, 'product': product});
+  String historyStockOutLine(String who, int qty, String unit, String product) =>
+      _f('historyStockOutLine',
+          {'who': who, 'qty': qty, 'unit': unit, 'product': product});
+  String historyAdjustAddLine(String who, int qty, String unit, String product) =>
+      _f('historyAdjustAddLine',
+          {'who': who, 'qty': qty, 'unit': unit, 'product': product});
+  String historyAdjustRemoveLine(
+          String who, int qty, String unit, String product) =>
+      _f('historyAdjustRemoveLine',
+          {'who': who, 'qty': qty, 'unit': unit, 'product': product});
+  String get warehouseStockList => _t('warehouseStockList');
+  String warehouseInStockCount(int count) =>
+      _f('warehouseInStockCount', {'count': count});
+  String get warehouseQuickActions => _t('warehouseQuickActions');
+  String get productSectionDetails => _t('productSectionDetails');
+  String get productSectionActions => _t('productSectionActions');
+  String get productSectionHistory => _t('productSectionHistory');
+  String get productInStock => _t('productInStock');
+  String get notSpecified => _t('notSpecified');
+}
+
+/// ARB yangilanganidan keyin ham eski bundle ishlasa, matnlar chiqishi uchun.
+Map<String, String> _fallbackMessages(String languageCode) {
+  return switch (languageCode) {
+    'en' => const {
+      'warehouseHistory': 'Warehouse history',
+      'warehouseHistoryHint': 'Who added or dispatched stock',
+      'historyAll': 'All',
+      'historyStockIn': 'Stock in',
+      'historyStockOut': 'Dispatch',
+      'historyAdjust': 'Adjustment',
+      'historyEmptyTitle': 'No history yet',
+      'historyEmptyHint': 'Entries appear here after stock in or dispatch',
+      'historyStockInLine': '{who} · +{qty} {unit} «{product}» (stock in)',
+      'historyStockOutLine': '{who} · −{qty} {unit} «{product}» (dispatch)',
+      'historyAdjustAddLine': '{who} · +{qty} {unit} «{product}»',
+      'historyAdjustRemoveLine': '{who} · −{qty} {unit} «{product}»',
+      'warehouseStockList': 'Products',
+      'warehouseInStockCount': '{count} items',
+      'warehouseQuickActions': 'Quick actions',
+      'productSectionDetails': 'Product details',
+      'productSectionActions': 'Manage quantity',
+      'productSectionHistory': 'Recent activity',
+      'productInStock': 'In stock',
+      'notSpecified': 'Not specified',
+    },
+    'ru' => const {
+      'warehouseHistory': 'История склада',
+      'warehouseHistoryHint': 'Кто и сколько добавил или отгрузил',
+      'historyAll': 'Все',
+      'historyStockIn': 'Приход',
+      'historyStockOut': 'Отгрузка',
+      'historyAdjust': 'Корректировка',
+      'historyEmptyTitle': 'История пуста',
+      'historyEmptyHint': 'Записи появятся после прихода или отгрузки',
+      'historyStockInLine': '{who} · +{qty} {unit} «{product}» (приход)',
+      'historyStockOutLine': '{who} · −{qty} {unit} «{product}» (отгрузка)',
+      'historyAdjustAddLine': '{who} · +{qty} {unit} «{product}»',
+      'historyAdjustRemoveLine': '{who} · −{qty} {unit} «{product}»',
+      'warehouseStockList': 'Товары',
+      'warehouseInStockCount': '{count} позиций',
+      'warehouseQuickActions': 'Быстрые действия',
+      'productSectionDetails': 'Основные данные',
+      'productSectionActions': 'Управление количеством',
+      'productSectionHistory': 'Последние операции',
+      'productInStock': 'На складе',
+      'notSpecified': 'Не указано',
+    },
+    _ => const {
+      'warehouseHistory': 'Ombor tarixi',
+      'warehouseHistoryHint': 'Kim qancha kirim yoki chiqim qilgani',
+      'historyAll': 'Barchasi',
+      'historyStockIn': 'Kirim',
+      'historyStockOut': 'Chiqarish',
+      'historyAdjust': 'Tuzatish',
+      'historyEmptyTitle': 'Tarix bo\'sh',
+      'historyEmptyHint': 'Kirim yoki chiqimdan keyin yozuvlar shu yerda chiqadi',
+      'historyStockInLine': '{who} · +{qty} {unit} «{product}» (kirim)',
+      'historyStockOutLine': '{who} · −{qty} {unit} «{product}» (chiqim)',
+      'historyAdjustAddLine': '{who} · +{qty} {unit} «{product}»',
+      'historyAdjustRemoveLine': '{who} · −{qty} {unit} «{product}»',
+      'warehouseStockList': 'Mahsulotlar',
+      'warehouseInStockCount': '{count} ta nom',
+      'warehouseQuickActions': 'Tezkor amallar',
+      'productSectionDetails': 'Asosiy ma\'lumot',
+      'productSectionActions': 'Miqdorni boshqarish',
+      'productSectionHistory': 'So\'nggi harakatlar',
+      'productInStock': 'Ombordagi zaxira',
+      'notSpecified': 'Ko\'rsatilmagan',
+    },
+  };
 }
 
 class _SDelegate extends LocalizationsDelegate<S> {

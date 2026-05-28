@@ -161,10 +161,142 @@ final tasksProvider =
   return TasksNotifier();
 });
 
+// ─── Warehouse history ────────────────────────────────────────────────────────
+
+final class WarehouseHistoryNotifier
+    extends StateNotifier<List<WarehouseHistoryEntry>> {
+  WarehouseHistoryNotifier() : super(_seed);
+
+  static final _now = DateTime.now();
+
+  static final _seed = <WarehouseHistoryEntry>[
+    WarehouseHistoryEntry(
+      id: 'h-1',
+      type: WarehouseHistoryType.stockIn,
+      productId: 'w-1',
+      productName: 'Shim',
+      quantity: 45,
+      unit: 'ta',
+      performedBy: 'Sherzod M.',
+      at: _now.subtract(const Duration(hours: 5)),
+    ),
+    WarehouseHistoryEntry(
+      id: 'h-2',
+      type: WarehouseHistoryType.stockOut,
+      productId: 'w-1',
+      productName: 'Shim',
+      quantity: 3,
+      unit: 'ta',
+      performedBy: 'Madina Y.',
+      at: _now.subtract(const Duration(hours: 3)),
+    ),
+    WarehouseHistoryEntry(
+      id: 'h-3',
+      type: WarehouseHistoryType.stockIn,
+      productId: 'w-2',
+      productName: 'Ko\'ylak',
+      quantity: 15,
+      unit: 'ta',
+      performedBy: 'Sherzod M.',
+      at: _now.subtract(const Duration(days: 1, hours: 2)),
+    ),
+    WarehouseHistoryEntry(
+      id: 'h-4',
+      type: WarehouseHistoryType.stockOut,
+      productId: 'w-5',
+      productName: 'Jaket',
+      quantity: 2,
+      unit: 'ta',
+      performedBy: 'Nilufar K.',
+      at: _now.subtract(const Duration(days: 1, hours: 5)),
+    ),
+    WarehouseHistoryEntry(
+      id: 'h-5',
+      type: WarehouseHistoryType.adjust,
+      productId: 'w-8',
+      productName: 'Mato (ko\'k)',
+      quantity: -10,
+      unit: 'metr',
+      performedBy: 'Dilshod K.',
+      at: _now.subtract(const Duration(days: 2)),
+    ),
+  ];
+
+  void _prepend(WarehouseHistoryEntry entry) {
+    state = [entry, ...state];
+  }
+
+  void logStockIn({
+    required WarehouseItem item,
+    required int quantity,
+    required String performedBy,
+  }) {
+    _prepend(
+      WarehouseHistoryEntry(
+        id: 'h-${DateTime.now().microsecondsSinceEpoch}',
+        type: WarehouseHistoryType.stockIn,
+        productId: item.id,
+        productName: item.name,
+        quantity: quantity,
+        unit: item.unit,
+        performedBy: performedBy,
+        at: DateTime.now(),
+      ),
+    );
+  }
+
+  void logStockOut({
+    required WarehouseItem item,
+    required int quantity,
+    required String performedBy,
+  }) {
+    _prepend(
+      WarehouseHistoryEntry(
+        id: 'h-${DateTime.now().microsecondsSinceEpoch}',
+        type: WarehouseHistoryType.stockOut,
+        productId: item.id,
+        productName: item.name,
+        quantity: quantity,
+        unit: item.unit,
+        performedBy: performedBy,
+        at: DateTime.now(),
+      ),
+    );
+  }
+
+  void logAdjust({
+    required WarehouseItem item,
+    required int delta,
+    required String performedBy,
+  }) {
+    if (delta == 0) return;
+    _prepend(
+      WarehouseHistoryEntry(
+        id: 'h-${DateTime.now().microsecondsSinceEpoch}',
+        type: WarehouseHistoryType.adjust,
+        productId: item.id,
+        productName: item.name,
+        quantity: delta,
+        unit: item.unit,
+        performedBy: performedBy,
+        at: DateTime.now(),
+      ),
+    );
+  }
+}
+
+final warehouseHistoryProvider =
+    StateNotifierProvider<WarehouseHistoryNotifier, List<WarehouseHistoryEntry>>(
+        (ref) {
+  return WarehouseHistoryNotifier();
+});
+
 // ─── Warehouse ────────────────────────────────────────────────────────────────
 
 final class WarehouseNotifier extends StateNotifier<List<WarehouseItem>> {
-  WarehouseNotifier() : super(_seed);
+  WarehouseNotifier(this._history) : super(_seed);
+
+  final WarehouseHistoryNotifier _history;
 
   static final _seed = <WarehouseItem>[
     const WarehouseItem(
@@ -251,9 +383,25 @@ final class WarehouseNotifier extends StateNotifier<List<WarehouseItem>> {
     ),
   ];
 
-  void add(WarehouseItem item) => state = [item, ...state];
+  WarehouseItem? _find(String id) {
+    for (final item in state) {
+      if (item.id == id) return item;
+    }
+    return null;
+  }
 
-  void updateQuantity(String id, int delta) {
+  void add(WarehouseItem item, {required String performedBy}) {
+    state = [item, ...state];
+    _history.logStockIn(
+      item: item,
+      quantity: item.quantity,
+      performedBy: performedBy,
+    );
+  }
+
+  void updateQuantity(String id, int delta, {required String performedBy}) {
+    final before = _find(id);
+    if (before == null || delta == 0) return;
     state = [
       for (final item in state)
         if (item.id == id)
@@ -261,17 +409,24 @@ final class WarehouseNotifier extends StateNotifier<List<WarehouseItem>> {
         else
           item,
     ];
+    final after = _find(id);
+    if (after != null) {
+      _history.logAdjust(item: after, delta: delta, performedBy: performedBy);
+    }
   }
 
   /// Chiqarish (otpravka) — miqdorni kamaytiradi.
-  void dispatch(String id, int qty) {
+  void dispatch(String id, int qty, {required String performedBy}) {
+    final item = _find(id);
+    if (item == null || qty <= 0) return;
     state = [
-      for (final item in state)
-        if (item.id == id)
-          item.copyWith(quantity: (item.quantity - qty).clamp(0, 99999))
+      for (final i in state)
+        if (i.id == id)
+          i.copyWith(quantity: (i.quantity - qty).clamp(0, 99999))
         else
-          item,
+          i,
     ];
+    _history.logStockOut(item: item, quantity: qty, performedBy: performedBy);
   }
 
   void update(WarehouseItem updated) {
@@ -285,7 +440,7 @@ final class WarehouseNotifier extends StateNotifier<List<WarehouseItem>> {
 
 final warehouseProvider =
     StateNotifierProvider<WarehouseNotifier, List<WarehouseItem>>((ref) {
-  return WarehouseNotifier();
+  return WarehouseNotifier(ref.read(warehouseHistoryProvider.notifier));
 });
 
 // ─── Employees ────────────────────────────────────────────────────────────────
