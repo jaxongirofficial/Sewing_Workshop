@@ -75,7 +75,6 @@ class HomeTabPage extends ConsumerWidget {
             tasks: tasks,
             onOpenAttendance: () => context.go(_attendancePath()),
             onOpenTasks: () => context.go(_tasksPath()),
-            onOpenWorkers: () => context.push(_workersPath()),
           ),
           const SizedBox(height: 14),
           HomeWorkersCard(

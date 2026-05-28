@@ -221,27 +221,16 @@ class HomeWorkerCards extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 10),
-        LayoutBuilder(
-          builder: (context, constraints) {
-            final side = (constraints.maxWidth - 12) / 2;
-            return Align(
-              alignment: Alignment.centerLeft,
-              child: SizedBox(
-                width: side,
-                height: side,
-                child: BrandDashboardHubCard(
-                  icon: Icons.work_rounded,
-                  label: s.myTasks,
-                  value: '$myTasksCount',
-                  caption: s.inList,
-                  chipLabel: s.active,
-                  chipIcon: Icons.bolt_rounded,
-                  actionLabel: s.workerViewTasks,
-                  onTap: onOpenTasks,
-                ),
-              ),
-            );
-          },
+        BrandDashboardHubCard(
+          fullWidth: true,
+          icon: Icons.work_rounded,
+          label: s.myTasks,
+          value: '$myTasksCount',
+          caption: s.inList,
+          chipLabel: s.active,
+          chipIcon: Icons.bolt_rounded,
+          actionLabel: s.workerViewTasks,
+          onTap: onOpenTasks,
         ),
       ],
     );

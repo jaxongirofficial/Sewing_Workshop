@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../../config/theme/app_colors.dart';
 import '../../../../../config/theme/app_radius.dart';
 import '../../../../../l10n/s.dart';
+import '../../../../../shared/widgets/brand/brand_scrollable_sheet.dart';
 import '../../../../../shared/widgets/brand/brand_text_field.dart';
 import '../../models/workshop_mock_models.dart';
 import 'warehouse_labels.dart';
@@ -59,48 +60,21 @@ class _WarehouseAddItemSheetState extends ConsumerState<WarehouseAddItemSheet> {
     final scheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final viewInsets = MediaQuery.viewInsetsOf(context);
     final s = S.of(context);
 
-    return Padding(
-      padding: EdgeInsets.fromLTRB(16, 8, 16, viewInsets.bottom + 16),
-      child: Container(
-        decoration: BoxDecoration(
-          color: isDark ? AppColors.darkCard : Colors.white,
-          borderRadius: BorderRadius.circular(AppRadius.xl),
-          border: Border.all(
-            color: isDark ? AppColors.darkBorder : const Color(0xFFE6EBF4),
-          ),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withValues(alpha: isDark ? 0.50 : 0.10),
-              blurRadius: 30,
-              offset: const Offset(0, 14),
-              spreadRadius: -10,
-            ),
-          ],
-        ),
-        child: Padding(
-          padding: const EdgeInsets.fromLTRB(18, 16, 18, 14),
-          child: Form(
-            key: _formKey,
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                Center(
-                  child: Container(
-                    width: 44,
-                    height: 4,
-                    decoration: BoxDecoration(
-                      color: scheme.onSurfaceVariant.withValues(alpha: 0.25),
-                      borderRadius: BorderRadius.circular(4),
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 16),
-                Text(
-                  s.newProduct,
+    return BrandScrollableSheet(
+      child: BrandSheetContainer(
+        padding: const EdgeInsets.fromLTRB(18, 16, 18, 14),
+        child: Form(
+          key: _formKey,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              const BrandSheetHandle(),
+              const SizedBox(height: 16),
+              Text(
+                s.newProduct,
                   style: textTheme.titleMedium?.copyWith(
                     fontWeight: FontWeight.w800,
                     letterSpacing: -0.3,
@@ -228,7 +202,6 @@ class _WarehouseAddItemSheetState extends ConsumerState<WarehouseAddItemSheet> {
             ),
           ),
         ),
-      ),
     );
   }
 }

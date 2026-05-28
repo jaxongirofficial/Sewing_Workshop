@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../../../config/theme/app_colors.dart';
 import '../../../../../config/theme/app_radius.dart';
 import '../../../../../core/enums/user_role.dart';
 import '../../../../../l10n/s.dart';
-import '../../../../../shared/widgets/brand/brand_surface.dart';
+import '../../../../../shared/widgets/brand/brand_scrollable_sheet.dart';
 import '../../../../auth/presentation/providers/auth_notifier.dart';
 import '../../models/workshop_mock_models.dart';
 import '../../providers/workshop_mock_providers.dart';
@@ -158,13 +159,88 @@ class _TasksTabPageState extends ConsumerState<TasksTabPage> {
           Positioned(
             right: 20,
             bottom: 20,
-            child: FloatingActionButton.extended(
-              onPressed: _openAddSheet,
-              icon: const Icon(Icons.add_rounded),
-              label: Text(s.newTask),
+            child: _NewTaskFab(
+              label: s.newTask,
+              onTap: _openAddSheet,
             ),
           ),
       ],
+    );
+  }
+}
+
+class _NewTaskFab extends StatelessWidget {
+  const _NewTaskFab({required this.label, required this.onTap});
+
+  final String label;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
+    return Material(
+      color: Colors.transparent,
+      elevation: 0,
+      shadowColor: Colors.transparent,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(28),
+        splashColor: Colors.white.withValues(alpha: 0.18),
+        highlightColor: Colors.white.withValues(alpha: 0.08),
+        child: Ink(
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(28),
+            gradient: LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [
+                scheme.primary,
+                Color.lerp(
+                  scheme.primary,
+                  AppColors.brandDeep,
+                  isDark ? 0.35 : 0.55,
+                )!,
+              ],
+            ),
+            border: Border.all(
+              color: Colors.white.withValues(alpha: isDark ? 0.12 : 0.22),
+            ),
+          ),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Container(
+                  width: 28,
+                  height: 28,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: Colors.white.withValues(alpha: 0.18),
+                  ),
+                  child: const Icon(
+                    Icons.add_rounded,
+                    color: Colors.white,
+                    size: 20,
+                  ),
+                ),
+                const SizedBox(width: 10),
+                Text(
+                  label,
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.w800,
+                    fontSize: 15,
+                    letterSpacing: 0.15,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
     );
   }
 }
@@ -261,31 +337,22 @@ class _TaskFormSheetState extends State<_TaskFormSheet> {
     final textTheme = Theme.of(context).textTheme;
     final isEdit = widget.initialTask != null;
 
-    return BrandSurface(
-      radius: AppRadius.xl,
-      padding: EdgeInsets.fromLTRB(
-        24,
-        20,
-        24,
-        MediaQuery.viewInsetsOf(context).bottom + 24,
-      ),
-      child: Form(
-        key: _formKey,
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Center(
-              child: Container(
-                width: 40,
-                height: 4,
-                decoration: BoxDecoration(
-                  color: scheme.onSurface.withValues(alpha: 0.2),
-                  borderRadius: BorderRadius.circular(2),
-                ),
-              ),
-            ),
-            const SizedBox(height: 16),
+    return BrandScrollableSheet(
+      child: BrandSheetContainer(
+        padding: EdgeInsets.fromLTRB(
+          24,
+          20,
+          24,
+          14 + MediaQuery.viewInsetsOf(context).bottom,
+        ),
+        child: Form(
+          key: _formKey,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              const BrandSheetHandle(),
+              const SizedBox(height: 16),
             Text(
               isEdit ? s.editTask : s.newTask,
               style: textTheme.titleMedium
@@ -436,6 +503,7 @@ class _TaskFormSheetState extends State<_TaskFormSheet> {
           ],
         ),
       ),
+    ),
     );
   }
 }
@@ -481,59 +549,52 @@ class _ProgressSheetState extends State<_ProgressSheet> {
     final scheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
 
-    return BrandSurface(
-      radius: AppRadius.xl,
-      padding: EdgeInsets.fromLTRB(
-        24,
-        20,
-        24,
-        MediaQuery.viewInsetsOf(context).bottom + 24,
-      ),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Center(
-            child: Container(
-              width: 40,
-              height: 4,
-              decoration: BoxDecoration(
-                color: scheme.onSurface.withValues(alpha: 0.2),
-                borderRadius: BorderRadius.circular(2),
+    return BrandScrollableSheet(
+      child: BrandSheetContainer(
+        padding: EdgeInsets.fromLTRB(
+          24,
+          20,
+          24,
+          14 + MediaQuery.viewInsetsOf(context).bottom,
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            const BrandSheetHandle(),
+            const SizedBox(height: 16),
+            Text(
+              widget.task.productName,
+              style:
+                  textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w800),
+            ),
+            const SizedBox(height: 4),
+            Text(
+              s.taskProgress(widget.task.doneQty, widget.task.targetQty),
+              style: textTheme.bodySmall?.copyWith(
+                color: scheme.onSurfaceVariant,
               ),
             ),
-          ),
-          const SizedBox(height: 16),
-          Text(
-            widget.task.productName,
-            style: textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w800),
-          ),
-          const SizedBox(height: 4),
-          Text(
-            s.taskProgress(widget.task.doneQty, widget.task.targetQty),
-            style: textTheme.bodySmall?.copyWith(
-              color: scheme.onSurfaceVariant,
-            ),
-          ),
-          const SizedBox(height: 16),
-          TextField(
-            controller: _ctrl,
-            keyboardType: TextInputType.number,
-            autofocus: true,
-            decoration: InputDecoration(
-              labelText: s.doneQtyHint,
-              suffixText: '/ ${widget.task.targetQty}',
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(AppRadius.md),
+            const SizedBox(height: 16),
+            TextField(
+              controller: _ctrl,
+              keyboardType: TextInputType.number,
+              autofocus: true,
+              decoration: InputDecoration(
+                labelText: s.doneQtyHint,
+                suffixText: '/ ${widget.task.targetQty}',
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(AppRadius.md),
+                ),
               ),
             ),
-          ),
-          const SizedBox(height: 20),
-          FilledButton(
-            onPressed: _submit,
-            child: Text(s.save),
-          ),
-        ],
+            const SizedBox(height: 20),
+            FilledButton(
+              onPressed: _submit,
+              child: Text(s.save),
+            ),
+          ],
+        ),
       ),
     );
   }

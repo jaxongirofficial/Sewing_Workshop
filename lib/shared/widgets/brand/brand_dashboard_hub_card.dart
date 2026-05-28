@@ -72,14 +72,20 @@ class BrandDashboardHubCard extends StatelessWidget {
           decoration: decoration,
           child: Padding(
             padding: EdgeInsets.all(fullWidth ? 16 : 14),
-            child: fullWidth ? _buildWide(context) : _buildSquare(context),
+            child: LayoutBuilder(
+              builder: (context, constraints) {
+                if (fullWidth) return _buildWide(context);
+                final compact = constraints.maxWidth < 152;
+                return _buildSquare(context, compact: compact);
+              },
+            ),
           ),
         ),
       ),
     );
   }
 
-  Widget _buildSquare(BuildContext context) {
+  Widget _buildSquare(BuildContext context, {bool compact = false}) {
     final scheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
     final isDark = Theme.of(context).brightness == Brightness.dark;
@@ -87,11 +93,16 @@ class BrandDashboardHubCard extends StatelessWidget {
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
+      mainAxisSize: MainAxisSize.min,
       children: [
         Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            _HubIconBadge(icon: icon, color: accent),
+            _HubIconBadge(
+              icon: icon,
+              color: accent,
+              size: compact ? 36 : 40,
+            ),
             const Spacer(),
             if (chipLabel != null)
               Flexible(
@@ -103,19 +114,19 @@ class BrandDashboardHubCard extends StatelessWidget {
               ),
           ],
         ),
-        const SizedBox(height: 12),
+        SizedBox(height: compact ? 8 : 12),
         Text(
           label.toUpperCase(),
           style: textTheme.labelSmall?.copyWith(
             color: scheme.onSurfaceVariant.withValues(alpha: 0.85),
             fontWeight: FontWeight.w700,
             letterSpacing: 0.8,
-            fontSize: 10,
+            fontSize: compact ? 9 : 10,
           ),
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
         ),
-        const SizedBox(height: 4),
+        SizedBox(height: compact ? 2 : 4),
         Text(
           value,
           style: textTheme.headlineMedium?.copyWith(
@@ -123,24 +134,24 @@ class BrandDashboardHubCard extends StatelessWidget {
             letterSpacing: -0.6,
             color: scheme.onSurface,
             height: 1.0,
-            fontSize: 26,
+            fontSize: compact ? 22 : 26,
           ),
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
         ),
-        const SizedBox(height: 3),
+        SizedBox(height: compact ? 2 : 3),
         Text(
           caption,
           style: textTheme.bodySmall?.copyWith(
             color: scheme.onSurfaceVariant,
             fontWeight: FontWeight.w500,
             height: 1.2,
-            fontSize: 11,
+            fontSize: compact ? 10 : 11,
           ),
           maxLines: 2,
           overflow: TextOverflow.ellipsis,
         ),
-        const Spacer(),
+        SizedBox(height: compact ? 8 : 10),
         _ActionStrip(
           label: actionLabel,
           accent: accent,

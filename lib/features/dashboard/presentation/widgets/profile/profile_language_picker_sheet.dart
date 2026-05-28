@@ -5,6 +5,7 @@ import '../../../../../config/l10n/locale_provider.dart';
 import '../../../../../config/theme/app_colors.dart';
 import '../../../../../config/theme/app_radius.dart';
 import '../../../../../l10n/s.dart';
+import '../../../../../shared/widgets/brand/brand_scrollable_sheet.dart';
 import '../../../../../shared/widgets/brand/language_flag_badge.dart';
 
 const _supportedLocales = <Locale>[
@@ -19,7 +20,6 @@ Future<void> showProfileLanguagePicker(
   Locale current,
 ) async {
   final scheme = Theme.of(context).colorScheme;
-  final isDark = Theme.of(context).brightness == Brightness.dark;
   final textTheme = Theme.of(context).textTheme;
   final s = S.of(context);
 
@@ -29,92 +29,44 @@ Future<void> showProfileLanguagePicker(
     isScrollControlled: true,
     useSafeArea: true,
     builder: (sheetCtx) {
-      final viewInsets = MediaQuery.viewInsetsOf(sheetCtx);
-
-      return LayoutBuilder(
-        builder: (context, constraints) {
-          return Padding(
-            padding: EdgeInsets.fromLTRB(16, 8, 16, viewInsets.bottom + 16),
-            child: ConstrainedBox(
-              constraints: BoxConstraints(maxHeight: constraints.maxHeight),
-              child: SingleChildScrollView(
-                physics: const ClampingScrollPhysics(),
-                child: Container(
-                  decoration: BoxDecoration(
-                    color: isDark ? AppColors.darkCard : Colors.white,
-                    borderRadius: BorderRadius.circular(AppRadius.xl),
-                    border: Border.all(
-                      color: isDark
-                          ? AppColors.darkBorder
-                          : const Color(0xFFE6EBF4),
-                    ),
-                    boxShadow: [
-                      BoxShadow(
-                        color: isDark
-                            ? Colors.black.withValues(alpha: 0.55)
-                            : AppColors.shadow.withValues(alpha: 0.10),
-                        blurRadius: 30,
-                        offset: const Offset(0, 14),
-                        spreadRadius: -10,
-                      ),
-                    ],
-                  ),
-                  child: Padding(
-                    padding: const EdgeInsets.fromLTRB(18, 18, 18, 14),
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: [
-                        Center(
-                          child: Container(
-                            width: 44,
-                            height: 4,
-                            decoration: BoxDecoration(
-                              color: scheme.onSurfaceVariant
-                                  .withValues(alpha: 0.25),
-                              borderRadius: BorderRadius.circular(4),
-                            ),
-                          ),
-                        ),
-                        const SizedBox(height: 16),
-                        Text(
-                          s.chooseLanguage,
-                          style: textTheme.titleMedium?.copyWith(
-                            fontWeight: FontWeight.w800,
-                            letterSpacing: -0.3,
-                          ),
-                        ),
-                        const SizedBox(height: 4),
-                        Text(
-                          s.chooseLanguageHint,
-                          style: textTheme.bodySmall?.copyWith(
-                            color: scheme.onSurfaceVariant,
-                          ),
-                        ),
-                        const SizedBox(height: 18),
-                        for (final locale in _supportedLocales) ...[
-                          _LanguageOption(
-                            locale: locale,
-                            selected:
-                                current.languageCode == locale.languageCode,
-                            onTap: () {
-                              ref
-                                  .read(localeProvider.notifier)
-                                  .setLocale(locale);
-                              Navigator.of(sheetCtx).pop();
-                            },
-                          ),
-                          if (locale != _supportedLocales.last)
-                            const SizedBox(height: 10),
-                        ],
-                      ],
-                    ),
-                  ),
+      return BrandScrollableSheet(
+        child: BrandSheetContainer(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              const BrandSheetHandle(),
+              const SizedBox(height: 16),
+              Text(
+                s.chooseLanguage,
+                style: textTheme.titleMedium?.copyWith(
+                  fontWeight: FontWeight.w800,
+                  letterSpacing: -0.3,
                 ),
               ),
-            ),
-          );
-        },
+              const SizedBox(height: 4),
+              Text(
+                s.chooseLanguageHint,
+                style: textTheme.bodySmall?.copyWith(
+                  color: scheme.onSurfaceVariant,
+                ),
+              ),
+              const SizedBox(height: 18),
+              for (final locale in _supportedLocales) ...[
+                _LanguageOption(
+                  locale: locale,
+                  selected: current.languageCode == locale.languageCode,
+                  onTap: () {
+                    ref.read(localeProvider.notifier).setLocale(locale);
+                    Navigator.of(sheetCtx).pop();
+                  },
+                ),
+                if (locale != _supportedLocales.last)
+                  const SizedBox(height: 10),
+              ],
+            ],
+          ),
+        ),
       );
     },
   );
