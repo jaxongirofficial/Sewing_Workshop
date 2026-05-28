@@ -3,7 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../config/theme/app_colors.dart';
-import '../../../features/dashboard/presentation/providers/fab_position_provider.dart';
+import '../../../features/workshop/presentation/providers/fab_position_provider.dart';
 
 /// Suzuvchi va sudralib bo'ladigan FAB.
 ///
