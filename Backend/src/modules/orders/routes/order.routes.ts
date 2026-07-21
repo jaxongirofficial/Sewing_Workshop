@@ -1,22 +1,62 @@
-import { Router } from 'express';
+import type { FastifyInstance } from 'fastify';
+import type { ZodTypeProvider } from 'fastify-type-provider-zod';
 
 import { authenticate } from '../../../middlewares/auth.middleware';
-import { validateRequest } from '../../../middlewares/validate-request';
 import { orderController } from '../controllers/order.controller';
 import {
-  createOrderValidator,
-  listOrdersValidator,
-  orderIdValidator,
-  updateOrderStatusValidator,
-  updateOrderValidator,
+  createOrderBodySchema,
+  listOrdersQuerySchema,
+  orderIdParamsSchema,
+  updateOrderBodySchema,
+  updateOrderStatusBodySchema,
 } from '../validators/order.validator';
 
-export const orderRouter = Router();
+export const orderRoutes = async (app: FastifyInstance): Promise<void> => {
+  const server = app.withTypeProvider<ZodTypeProvider>();
 
-orderRouter.use(authenticate);
+  server.addHook('preHandler', authenticate);
 
-orderRouter.get('/', listOrdersValidator, validateRequest, orderController.list);
-orderRouter.post('/', createOrderValidator, validateRequest, orderController.create);
-orderRouter.patch('/:orderId', updateOrderValidator, validateRequest, orderController.update);
-orderRouter.patch('/:orderId/status', updateOrderStatusValidator, validateRequest, orderController.updateStatus);
-orderRouter.delete('/:orderId', orderIdValidator, validateRequest, orderController.delete);
+  server.get(
+    '/',
+    { schema: { tags: ['Orders'], security: [{ bearerAuth: [] }], querystring: listOrdersQuerySchema } },
+    orderController.list,
+  );
+
+  server.post(
+    '/',
+    { schema: { tags: ['Orders'], security: [{ bearerAuth: [] }], body: createOrderBodySchema } },
+    orderController.create,
+  );
+
+  server.patch(
+    '/:orderId',
+    {
+      schema: {
+        tags: ['Orders'],
+        security: [{ bearerAuth: [] }],
+        params: orderIdParamsSchema,
+        body: updateOrderBodySchema,
+      },
+    },
+    orderController.update,
+  );
+
+  server.patch(
+    '/:orderId/status',
+    {
+      schema: {
+        tags: ['Orders'],
+        security: [{ bearerAuth: [] }],
+        params: orderIdParamsSchema,
+        body: updateOrderStatusBodySchema,
+      },
+    },
+    orderController.updateStatus,
+  );
+
+  server.delete(
+    '/:orderId',
+    { schema: { tags: ['Orders'], security: [{ bearerAuth: [] }], params: orderIdParamsSchema } },
+    orderController.delete,
+  );
+};

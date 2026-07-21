@@ -1,4 +1,4 @@
-import type { FilterQuery, UpdateWriteOpResult } from 'mongoose';
+import type { QueryFilter, UpdateWriteOpResult } from 'mongoose';
 
 import { RefreshTokenModel, type IRefreshTokenDocument } from '../models/refresh-token.model';
 import { UserModel, type IUser, type IUserDocument } from '../models/user.model';
@@ -28,7 +28,7 @@ export class AuthRepository {
   }
 
   findActiveRefreshToken(tokenHash: string): Promise<IRefreshTokenDocument | null> {
-    const filter: FilterQuery<IRefreshTokenDocument> = {
+    const filter: QueryFilter<IRefreshTokenDocument> = {
       tokenHash,
       revokedAt: null,
       expiresAt: { $gt: new Date() },

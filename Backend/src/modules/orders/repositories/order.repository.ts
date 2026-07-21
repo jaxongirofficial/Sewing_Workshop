@@ -1,15 +1,22 @@
-import type { FilterQuery, UpdateQuery } from 'mongoose';
+import type { QueryFilter, UpdateQuery } from 'mongoose';
 
 import { OrderModel, OrderStatus, type IOrder, type IOrderDocument } from '../models/order.model';
 
 export interface OrderListQuery {
   customerId?: string;
   status?: OrderStatus;
+  page: number;
+  limit: number;
+}
+
+export interface OrderListResult {
+  items: IOrderDocument[];
+  total: number;
 }
 
 export class OrderRepository {
-  findAll(query: OrderListQuery = {}): Promise<IOrderDocument[]> {
-    const filter: FilterQuery<IOrderDocument> = {};
+  async findAll(query: OrderListQuery): Promise<OrderListResult> {
+    const filter: QueryFilter<IOrderDocument> = {};
 
     if (query.customerId) {
       filter.customerId = query.customerId;
@@ -19,7 +26,14 @@ export class OrderRepository {
       filter.status = query.status;
     }
 
-    return OrderModel.find(filter).sort({ deadline: 1, createdAt: -1 }).exec();
+    const skip = (query.page - 1) * query.limit;
+
+    const [items, total] = await Promise.all([
+      OrderModel.find(filter).sort({ deadline: 1, createdAt: -1 }).skip(skip).limit(query.limit).exec(),
+      OrderModel.countDocuments(filter).exec(),
+    ]);
+
+    return { items, total };
   }
 
   findById(orderId: string): Promise<IOrderDocument | null> {

@@ -11,7 +11,6 @@ export interface RegisterInput {
   fullName: string;
   email: string;
   password: string;
-  role?: UserRole;
 }
 
 export interface LoginInput {
@@ -69,7 +68,7 @@ export class AuthService {
       fullName: input.fullName.trim(),
       email: input.email.toLowerCase().trim(),
       password,
-      role: input.role ?? UserRole.Staff,
+      role: UserRole.Staff,
     });
 
     return this.createSession(user);
@@ -124,7 +123,7 @@ export class AuthService {
     const refreshToken = this.signRefreshToken(user, tokenHash);
 
     await this.repository.createRefreshToken({
-      userId: user.id,
+      userId: user._id.toString(),
       tokenHash,
       expiresAt: new Date(Date.now() + toSeconds(env.jwtRefreshExpiresIn) * 1000),
     });
@@ -140,7 +139,7 @@ export class AuthService {
     const options: SignOptions = { expiresIn: env.jwtAccessExpiresIn as JwtExpiresIn };
     return jwt.sign(
       {
-        userId: user.id,
+        userId: user._id.toString(),
         role: user.role,
         type: 'access',
       },
@@ -153,7 +152,7 @@ export class AuthService {
     const options: SignOptions = { expiresIn: env.jwtRefreshExpiresIn as JwtExpiresIn };
     return jwt.sign(
       {
-        userId: user.id,
+        userId: user._id.toString(),
         tokenHash,
         type: 'refresh',
       },
@@ -178,7 +177,7 @@ export class AuthService {
 
   private mapUser(user: IUserDocument): AuthUserResponse {
     return {
-      id: user.id,
+      id: user._id.toString(),
       fullName: user.fullName,
       email: user.email,
       role: user.role,

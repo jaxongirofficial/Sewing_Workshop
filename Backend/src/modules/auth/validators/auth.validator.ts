@@ -1,31 +1,22 @@
-import { body } from 'express-validator';
+import { z } from 'zod';
 
-import { UserRole } from '../models/user.model';
+export const registerBodySchema = z.object({
+  fullName: z.string().trim().min(2).max(120),
+  email: z.string().trim().toLowerCase().email(),
+  password: z.string().min(8).max(128),
+});
 
-export const registerValidator = [
-  body('fullName')
-    .isString()
-    .trim()
-    .isLength({ min: 2, max: 120 })
-    .withMessage('Full name must be between 2 and 120 characters'),
-  body('email').isEmail().normalizeEmail().withMessage('A valid email is required'),
-  body('password')
-    .isString()
-    .isLength({ min: 8, max: 128 })
-    .withMessage('Password must be between 8 and 128 characters'),
-  body('role')
-    .optional()
-    .isIn(Object.values(UserRole))
-    .withMessage('Role must be admin, manager, or staff'),
-];
+export const loginBodySchema = z.object({
+  email: z.string().trim().toLowerCase().email(),
+  password: z.string().min(1),
+});
 
-export const loginValidator = [
-  body('email').isEmail().normalizeEmail().withMessage('A valid email is required'),
-  body('password').isString().notEmpty().withMessage('Password is required'),
-];
+export const refreshTokenBodySchema = z.object({
+  refreshToken: z.string().min(1),
+});
 
-export const refreshTokenValidator = [
-  body('refreshToken').isString().notEmpty().withMessage('Refresh token is required'),
-];
+export const logoutBodySchema = refreshTokenBodySchema;
 
-export const logoutValidator = refreshTokenValidator;
+export type RegisterBody = z.infer<typeof registerBodySchema>;
+export type LoginBody = z.infer<typeof loginBodySchema>;
+export type RefreshTokenBody = z.infer<typeof refreshTokenBodySchema>;

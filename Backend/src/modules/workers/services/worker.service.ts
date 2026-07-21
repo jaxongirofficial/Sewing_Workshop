@@ -1,4 +1,5 @@
 import { HttpError } from '../../../shared/errors/http-error';
+import { buildPaginationMeta, type PaginatedResult } from '../../../shared/pagination';
 import { WorkerStatus, type IWorkerDocument } from '../models/worker.model';
 import {
   workerRepository,
@@ -30,9 +31,12 @@ export interface WorkerResponse {
 export class WorkerService {
   constructor(private readonly repository: WorkerRepository = workerRepository) {}
 
-  async list(query: WorkerListQuery): Promise<WorkerResponse[]> {
-    const workers = await this.repository.findAll(query);
-    return workers.map((worker) => this.mapWorker(worker));
+  async list(query: WorkerListQuery): Promise<PaginatedResult<WorkerResponse>> {
+    const { items, total } = await this.repository.findAll(query);
+    return {
+      items: items.map((worker) => this.mapWorker(worker)),
+      pagination: buildPaginationMeta(query.page, query.limit, total),
+    };
   }
 
   async create(input: CreateWorkerInput): Promise<WorkerResponse> {
@@ -73,7 +77,7 @@ export class WorkerService {
 
   private mapWorker(worker: IWorkerDocument): WorkerResponse {
     return {
-      id: worker.id,
+      id: worker._id.toString(),
       fullName: worker.fullName,
       phone: worker.phone,
       position: worker.position,

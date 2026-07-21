@@ -1,47 +1,88 @@
-import cookieParser from 'cookie-parser';
-import cors from 'cors';
-import express from 'express';
-import helmet from 'helmet';
-import morgan from 'morgan';
+import cookie from '@fastify/cookie';
+import cors from '@fastify/cors';
+import helmet from '@fastify/helmet';
+import multipart from '@fastify/multipart';
+import rateLimit from '@fastify/rate-limit';
+import swagger from '@fastify/swagger';
+import swaggerUi from '@fastify/swagger-ui';
+import Fastify, { type FastifyInstance } from 'fastify';
+import {
+  jsonSchemaTransform,
+  serializerCompiler,
+  validatorCompiler,
+  type ZodTypeProvider,
+} from 'fastify-type-provider-zod';
 
 import { env } from './config/env';
-import { errorHandler } from './middlewares/error-handler';
-import { authRouter } from './modules/auth/routes/auth.routes';
-import { customerRouter } from './modules/customers/routes/customer.routes';
-import { orderRouter } from './modules/orders/routes/order.routes';
-import { paymentRouter } from './modules/payments/routes/payment.routes';
-import { workerRouter } from './modules/workers/routes/worker.routes';
+import { registerErrorHandler } from './middlewares/error-handler';
+import { authRoutes } from './modules/auth/routes/auth.routes';
+import { customerRoutes } from './modules/customers/routes/customer.routes';
+import { orderRoutes } from './modules/orders/routes/order.routes';
+import { paymentRoutes } from './modules/payments/routes/payment.routes';
+import { workerRoutes } from './modules/workers/routes/worker.routes';
+import { successResponse } from './shared/http-response';
 
-export const app = express();
+export const buildApp = async (): Promise<FastifyInstance> => {
+  const app = Fastify({
+    logger: {
+      level: env.nodeEnv === 'production' ? 'info' : 'debug',
+      transport: env.nodeEnv === 'production' ? undefined : { target: 'pino-pretty' },
+    },
+  }).withTypeProvider<ZodTypeProvider>();
 
-app.use(helmet());
-app.use(
-  cors({
+  // Zod becomes Fastify's schema validator/serializer, replacing express-validator.
+  // Route schemas (added per-module in later steps) are plain Zod objects.
+  app.setValidatorCompiler(validatorCompiler);
+  app.setSerializerCompiler(serializerCompiler);
+
+  await app.register(helmet);
+  await app.register(cors, {
     origin: env.clientOrigin,
     credentials: true,
-  }),
-);
-app.use(express.json({ limit: '1mb' }));
-app.use(express.urlencoded({ extended: true }));
-app.use(cookieParser());
-
-if (env.nodeEnv !== 'test') {
-  app.use(morgan('dev'));
-}
-
-app.get('/api/health', (_req, res) => {
-  res.json({
-    success: true,
-    data: {
-      service: 'sewing-workshop-api',
-      status: 'ok',
-    },
   });
-});
+  await app.register(cookie);
+  await app.register(multipart);
+  await app.register(rateLimit, {
+    max: 100,
+    timeWindow: '1 minute',
+  });
 
-app.use('/api/auth', authRouter);
-app.use('/api/customers', customerRouter);
-app.use('/api/orders', orderRouter);
-app.use('/api/payments', paymentRouter);
-app.use('/api/workers', workerRouter);
-app.use(errorHandler);
+  await app.register(swagger, {
+    openapi: {
+      info: {
+        title: 'Sewing Workshop API',
+        description: 'Backend API for the Sewing Workshop Management System.',
+        version: '1.0.0',
+      },
+      components: {
+        securitySchemes: {
+          bearerAuth: {
+            type: 'http',
+            scheme: 'bearer',
+            bearerFormat: 'JWT',
+          },
+        },
+      },
+    },
+    transform: jsonSchemaTransform,
+  });
+  await app.register(swaggerUi, {
+    routePrefix: '/docs',
+  });
+
+  registerErrorHandler(app);
+
+  app.get('/api/health', async () =>
+    successResponse({ service: 'sewing-workshop-api', status: 'ok' }, 'Service is healthy'),
+  );
+
+  // Module routes are registered here module-by-module, so each migration
+  // stays reviewable on its own instead of landing as one large diff.
+  await app.register(authRoutes, { prefix: '/api/auth' });
+  await app.register(customerRoutes, { prefix: '/api/customers' });
+  await app.register(orderRoutes, { prefix: '/api/orders' });
+  await app.register(paymentRoutes, { prefix: '/api/payments' });
+  await app.register(workerRoutes, { prefix: '/api/workers' });
+
+  return app;
+};

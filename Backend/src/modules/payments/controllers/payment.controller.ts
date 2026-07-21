@@ -1,29 +1,27 @@
-import { asyncHandler } from '../../../shared/utils/async-handler';
+import type { FastifyReply, FastifyRequest } from 'fastify';
+
+import { successResponse } from '../../../shared/http-response';
 import { paymentService, type PaymentService } from '../services/payment.service';
+import type { PaymentHistoryQuery, RecordPaymentBody } from '../validators/payment.validator';
 
 export class PaymentController {
   constructor(private readonly service: PaymentService = paymentService) {}
 
-  history = asyncHandler(async (req, res) => {
-    const payments = await this.service.history({
-      workerId: typeof req.query.workerId === 'string' ? req.query.workerId : undefined,
-      from: req.query.from instanceof Date ? req.query.from : undefined,
-      to: req.query.to instanceof Date ? req.query.to : undefined,
-    });
+  history = async (
+    request: FastifyRequest<{ Querystring: PaymentHistoryQuery }>,
+    reply: FastifyReply,
+  ): Promise<void> => {
+    const result = await this.service.history(request.query);
+    reply.send(successResponse(result, 'Payments fetched successfully'));
+  };
 
-    res.json({
-      success: true,
-      data: { payments },
-    });
-  });
-
-  record = asyncHandler(async (req, res) => {
-    const payment = await this.service.record(req.body);
-    res.status(201).json({
-      success: true,
-      data: { payment },
-    });
-  });
+  record = async (
+    request: FastifyRequest<{ Body: RecordPaymentBody }>,
+    reply: FastifyReply,
+  ): Promise<void> => {
+    const payment = await this.service.record(request.body);
+    reply.status(201).send(successResponse({ payment }, 'Payment recorded successfully'));
+  };
 }
 
 export const paymentController = new PaymentController();

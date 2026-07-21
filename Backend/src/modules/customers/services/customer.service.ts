@@ -1,4 +1,5 @@
 import { HttpError } from '../../../shared/errors/http-error';
+import { buildPaginationMeta, type PaginatedResult } from '../../../shared/pagination';
 import type { ICustomerDocument } from '../models/customer.model';
 import {
   customerRepository,
@@ -26,9 +27,23 @@ export interface CustomerResponse {
 export class CustomerService {
   constructor(private readonly repository: CustomerRepository = customerRepository) {}
 
-  async list(query: CustomerListQuery): Promise<CustomerResponse[]> {
-    const customers = await this.repository.findAll(query);
-    return customers.map((customer) => this.mapCustomer(customer));
+  async list(query: CustomerListQuery): Promise<PaginatedResult<CustomerResponse>> {
+    const { items, total } = await this.repository.findAll(query);
+
+    return {
+      items: items.map((customer) => this.mapCustomer(customer)),
+      pagination: buildPaginationMeta(query.page, query.limit, total),
+    };
+  }
+
+  async getById(customerId: string): Promise<CustomerResponse> {
+    const customer = await this.repository.findById(customerId);
+
+    if (!customer) {
+      throw new HttpError(404, 'Customer not found', 'CUSTOMER_NOT_FOUND');
+    }
+
+    return this.mapCustomer(customer);
   }
 
   async create(input: CreateCustomerInput): Promise<CustomerResponse> {
@@ -49,6 +64,7 @@ export class CustomerService {
     };
 
     const customer = await this.repository.update(customerId, update);
+
     if (!customer) {
       throw new HttpError(404, 'Customer not found', 'CUSTOMER_NOT_FOUND');
     }
@@ -58,6 +74,7 @@ export class CustomerService {
 
   async delete(customerId: string): Promise<void> {
     const customer = await this.repository.delete(customerId);
+
     if (!customer) {
       throw new HttpError(404, 'Customer not found', 'CUSTOMER_NOT_FOUND');
     }
@@ -65,7 +82,7 @@ export class CustomerService {
 
   private mapCustomer(customer: ICustomerDocument): CustomerResponse {
     return {
-      id: customer.id,
+      id: customer._id.toString(),
       fullName: customer.fullName,
       phone: customer.phone,
       address: customer.address,

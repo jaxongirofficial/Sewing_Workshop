@@ -1,13 +1,24 @@
-import { Router } from 'express';
+import type { FastifyInstance } from 'fastify';
+import type { ZodTypeProvider } from 'fastify-type-provider-zod';
 
 import { authenticate } from '../../../middlewares/auth.middleware';
-import { validateRequest } from '../../../middlewares/validate-request';
 import { paymentController } from '../controllers/payment.controller';
-import { paymentHistoryValidator, recordPaymentValidator } from '../validators/payment.validator';
+import { paymentHistoryQuerySchema, recordPaymentBodySchema } from '../validators/payment.validator';
 
-export const paymentRouter = Router();
+export const paymentRoutes = async (app: FastifyInstance): Promise<void> => {
+  const server = app.withTypeProvider<ZodTypeProvider>();
 
-paymentRouter.use(authenticate);
+  server.addHook('preHandler', authenticate);
 
-paymentRouter.get('/', paymentHistoryValidator, validateRequest, paymentController.history);
-paymentRouter.post('/', recordPaymentValidator, validateRequest, paymentController.record);
+  server.get(
+    '/',
+    { schema: { tags: ['Payments'], security: [{ bearerAuth: [] }], querystring: paymentHistoryQuerySchema } },
+    paymentController.history,
+  );
+
+  server.post(
+    '/',
+    { schema: { tags: ['Payments'], security: [{ bearerAuth: [] }], body: recordPaymentBodySchema } },
+    paymentController.record,
+  );
+};

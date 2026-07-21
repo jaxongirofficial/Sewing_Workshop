@@ -1,5 +1,3 @@
-import type { Request } from 'express';
-
 import type { UserRole } from '../modules/auth/models/user.model';
 
 export interface AuthUserPayload {
@@ -7,6 +5,8 @@ export interface AuthUserPayload {
   role: UserRole;
 }
 
-export interface AuthenticatedRequest extends Request {
-  user?: AuthUserPayload;
+declare module 'fastify' {
+  interface FastifyRequest {
+    user?: AuthUserPayload;
+  }
 }

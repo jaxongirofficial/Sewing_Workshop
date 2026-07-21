@@ -1,40 +1,61 @@
-import { asyncHandler } from '../../../shared/utils/async-handler';
+import type { FastifyReply, FastifyRequest } from 'fastify';
+
+import { successResponse } from '../../../shared/http-response';
 import { customerService, type CustomerService } from '../services/customer.service';
+import type {
+  CreateCustomerBody,
+  CustomerIdParams,
+  ListCustomersQuery,
+  UpdateCustomerBody,
+} from '../validators/customer.validator';
 
 export class CustomerController {
   constructor(private readonly service: CustomerService = customerService) {}
 
-  list = asyncHandler(async (req, res) => {
-    const customers = await this.service.list({
-      search: typeof req.query.search === 'string' ? req.query.search : undefined,
-    });
+  list = async (
+    request: FastifyRequest<{ Querystring: ListCustomersQuery }>,
+    reply: FastifyReply,
+  ): Promise<void> => {
+    const result = await this.service.list(request.query);
 
-    res.json({
-      success: true,
-      data: { customers },
-    });
-  });
+    reply.send(successResponse(result, 'Customers fetched successfully'));
+  };
 
-  create = asyncHandler(async (req, res) => {
-    const customer = await this.service.create(req.body);
-    res.status(201).json({
-      success: true,
-      data: { customer },
-    });
-  });
+  getById = async (
+    request: FastifyRequest<{ Params: CustomerIdParams }>,
+    reply: FastifyReply,
+  ): Promise<void> => {
+    const customer = await this.service.getById(request.params.customerId);
 
-  update = asyncHandler(async (req, res) => {
-    const customer = await this.service.update(req.params.customerId, req.body);
-    res.json({
-      success: true,
-      data: { customer },
-    });
-  });
+    reply.send(successResponse({ customer }, 'Customer fetched successfully'));
+  };
 
-  delete = asyncHandler(async (req, res) => {
-    await this.service.delete(req.params.customerId);
-    res.status(204).send();
-  });
+  create = async (
+    request: FastifyRequest<{ Body: CreateCustomerBody }>,
+    reply: FastifyReply,
+  ): Promise<void> => {
+    const customer = await this.service.create(request.body);
+
+    reply.status(201).send(successResponse({ customer }, 'Customer created successfully'));
+  };
+
+  update = async (
+    request: FastifyRequest<{ Params: CustomerIdParams; Body: UpdateCustomerBody }>,
+    reply: FastifyReply,
+  ): Promise<void> => {
+    const customer = await this.service.update(request.params.customerId, request.body);
+
+    reply.send(successResponse({ customer }, 'Customer updated successfully'));
+  };
+
+  delete = async (
+    request: FastifyRequest<{ Params: CustomerIdParams }>,
+    reply: FastifyReply,
+  ): Promise<void> => {
+    await this.service.delete(request.params.customerId);
+
+    reply.status(204).send();
+  };
 }
 
 export const customerController = new CustomerController();

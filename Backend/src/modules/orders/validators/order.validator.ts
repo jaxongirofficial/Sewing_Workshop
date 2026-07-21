@@ -1,36 +1,37 @@
-import { body, param, query } from 'express-validator';
+import { z } from 'zod';
 
+import { paginationQuerySchema } from '../../../shared/pagination';
+import { objectIdSchema } from '../../../shared/validators/object-id';
 import { OrderStatus } from '../models/order.model';
 
-export const orderIdValidator = [
-  param('orderId').isMongoId().withMessage('Order id must be a valid Mongo id'),
-];
+const orderStatusEnum = z.nativeEnum(OrderStatus);
 
-export const listOrdersValidator = [
-  query('customerId').optional().isMongoId(),
-  query('status').optional().isIn(Object.values(OrderStatus)),
-];
+export const orderIdParamsSchema = z.object({
+  orderId: objectIdSchema,
+});
 
-export const createOrderValidator = [
-  body('orderNumber').isString().trim().isLength({ min: 2, max: 40 }),
-  body('customerId').isMongoId().withMessage('Customer id must be a valid Mongo id'),
-  body('quantity').isInt({ min: 1 }),
-  body('totalPrice').isFloat({ min: 0 }),
-  body('deadline').isISO8601().toDate(),
-  body('status').optional().isIn(Object.values(OrderStatus)),
-];
+export const listOrdersQuerySchema = paginationQuerySchema.extend({
+  customerId: objectIdSchema.optional(),
+  status: orderStatusEnum.optional(),
+});
 
-export const updateOrderValidator = [
-  ...orderIdValidator,
-  body('orderNumber').optional().isString().trim().isLength({ min: 2, max: 40 }),
-  body('customerId').optional().isMongoId(),
-  body('quantity').optional().isInt({ min: 1 }),
-  body('totalPrice').optional().isFloat({ min: 0 }),
-  body('deadline').optional().isISO8601().toDate(),
-  body('status').optional().isIn(Object.values(OrderStatus)),
-];
+export const createOrderBodySchema = z.object({
+  orderNumber: z.string().trim().min(2).max(40),
+  customerId: objectIdSchema,
+  quantity: z.number().int().min(1),
+  totalPrice: z.number().min(0),
+  deadline: z.coerce.date(),
+  status: orderStatusEnum.optional(),
+});
 
-export const updateOrderStatusValidator = [
-  ...orderIdValidator,
-  body('status').isIn(Object.values(OrderStatus)),
-];
+export const updateOrderBodySchema = createOrderBodySchema.partial();
+
+export const updateOrderStatusBodySchema = z.object({
+  status: orderStatusEnum,
+});
+
+export type OrderIdParams = z.infer<typeof orderIdParamsSchema>;
+export type ListOrdersQuery = z.infer<typeof listOrdersQuerySchema>;
+export type CreateOrderBody = z.infer<typeof createOrderBodySchema>;
+export type UpdateOrderBody = z.infer<typeof updateOrderBodySchema>;
+export type UpdateOrderStatusBody = z.infer<typeof updateOrderStatusBodySchema>;

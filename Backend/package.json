@@ -10,27 +10,28 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
+    "@fastify/cookie": "latest",
+    "@fastify/cors": "latest",
+    "@fastify/helmet": "latest",
+    "@fastify/multipart": "latest",
+    "@fastify/rate-limit": "latest",
+    "@fastify/swagger": "latest",
+    "@fastify/swagger-ui": "latest",
     "bcrypt": "latest",
-    "cookie-parser": "latest",
-    "cors": "latest",
     "dotenv": "latest",
-    "express": "latest",
-    "express-validator": "latest",
-    "helmet": "latest",
+    "fastify": "latest",
+    "fastify-plugin": "latest",
+    "fastify-type-provider-zod": "latest",
     "jsonwebtoken": "latest",
     "mongoose": "latest",
-    "morgan": "latest",
-    "multer": "latest"
+    "zod": "latest"
   },
   "devDependencies": {
     "@types/bcrypt": "latest",
-    "@types/cookie-parser": "latest",
-    "@types/cors": "latest",
-    "@types/express": "latest",
     "@types/jsonwebtoken": "latest",
-    "@types/morgan": "latest",
     "@types/node": "latest",
+    "pino-pretty": "latest",
     "ts-node-dev": "latest",
-    "typescript": "latest"
+    "typescript": "^5.7.3"
   }
 }

@@ -1,48 +1,48 @@
-import { asyncHandler } from '../../../shared/utils/async-handler';
-import { WorkerStatus } from '../models/worker.model';
+import type { FastifyReply, FastifyRequest } from 'fastify';
+
+import { successResponse } from '../../../shared/http-response';
 import { workerService, type WorkerService } from '../services/worker.service';
+import type {
+  CreateWorkerBody,
+  ListWorkersQuery,
+  UpdateWorkerBody,
+  WorkerIdParams,
+} from '../validators/worker.validator';
 
 export class WorkerController {
   constructor(private readonly service: WorkerService = workerService) {}
 
-  list = asyncHandler(async (req, res) => {
-    const workers = await this.service.list({
-      search: typeof req.query.search === 'string' ? req.query.search : undefined,
-      status: this.parseStatus(req.query.status),
-    });
+  list = async (
+    request: FastifyRequest<{ Querystring: ListWorkersQuery }>,
+    reply: FastifyReply,
+  ): Promise<void> => {
+    const result = await this.service.list(request.query);
+    reply.send(successResponse(result, 'Workers fetched successfully'));
+  };
 
-    res.json({
-      success: true,
-      data: { workers },
-    });
-  });
+  create = async (
+    request: FastifyRequest<{ Body: CreateWorkerBody }>,
+    reply: FastifyReply,
+  ): Promise<void> => {
+    const worker = await this.service.create(request.body);
+    reply.status(201).send(successResponse({ worker }, 'Worker created successfully'));
+  };
 
-  create = asyncHandler(async (req, res) => {
-    const worker = await this.service.create(req.body);
-    res.status(201).json({
-      success: true,
-      data: { worker },
-    });
-  });
+  update = async (
+    request: FastifyRequest<{ Params: WorkerIdParams; Body: UpdateWorkerBody }>,
+    reply: FastifyReply,
+  ): Promise<void> => {
+    const worker = await this.service.update(request.params.workerId, request.body);
+    reply.send(successResponse({ worker }, 'Worker updated successfully'));
+  };
 
-  update = asyncHandler(async (req, res) => {
-    const worker = await this.service.update(req.params.workerId, req.body);
-    res.json({
-      success: true,
-      data: { worker },
-    });
-  });
-
-  delete = asyncHandler(async (req, res) => {
-    await this.service.delete(req.params.workerId);
-    res.status(204).send();
-  });
-
-  private parseStatus(value: unknown): WorkerStatus | undefined {
-    return typeof value === 'string' && Object.values(WorkerStatus).includes(value as WorkerStatus)
-      ? (value as WorkerStatus)
-      : undefined;
-  }
+  delete = async (
+    request: FastifyRequest<{ Params: WorkerIdParams }>,
+    reply: FastifyReply,
+  ): Promise<void> => {
+    await this.service.delete(request.params.workerId);
+    reply.status(204).send();
+  };
 }
 
 export const workerController = new WorkerController();

@@ -1,22 +1,20 @@
 import jwt from 'jsonwebtoken';
-import type { RequestHandler } from 'express';
+import type { FastifyReply, FastifyRequest } from 'fastify';
 
 import { env } from '../config/env';
 import { HttpError } from '../shared/errors/http-error';
-import type { AuthUserPayload, AuthenticatedRequest } from '../types/auth-request';
+import type { AuthUserPayload } from '../types/auth-request';
 
 interface AccessTokenPayload extends AuthUserPayload {
   type: 'access';
 }
 
-export const authenticate: RequestHandler = (req, _res, next) => {
-  const authReq = req as AuthenticatedRequest;
-  const header = req.headers.authorization;
+export const authenticate = async (request: FastifyRequest, _reply: FastifyReply): Promise<void> => {
+  const header = request.headers.authorization;
   const token = header?.startsWith('Bearer ') ? header.slice(7) : undefined;
 
   if (!token) {
-    next(new HttpError(401, 'Authentication token is required', 'AUTH_TOKEN_REQUIRED'));
-    return;
+    throw new HttpError(401, 'Authentication token is required', 'AUTH_TOKEN_REQUIRED');
   }
 
   try {
@@ -24,12 +22,13 @@ export const authenticate: RequestHandler = (req, _res, next) => {
     if (payload.type !== 'access') {
       throw new HttpError(401, 'Invalid authentication token', 'INVALID_AUTH_TOKEN');
     }
-    authReq.user = {
+    request.user = {
       userId: payload.userId,
       role: payload.role,
     };
-    next();
   } catch (error) {
-    next(error instanceof HttpError ? error : new HttpError(401, 'Invalid authentication token', 'INVALID_AUTH_TOKEN'));
+    throw error instanceof HttpError
+      ? error
+      : new HttpError(401, 'Invalid authentication token', 'INVALID_AUTH_TOKEN');
   }
 };

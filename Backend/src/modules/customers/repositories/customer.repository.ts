@@ -1,20 +1,34 @@
-import type { FilterQuery, UpdateQuery } from 'mongoose';
+import type { QueryFilter, UpdateQuery } from 'mongoose';
 
 import { CustomerModel, type ICustomer, type ICustomerDocument } from '../models/customer.model';
 
 export interface CustomerListQuery {
   search?: string;
+  page: number;
+  limit: number;
+}
+
+export interface CustomerListResult {
+  items: ICustomerDocument[];
+  total: number;
 }
 
 export class CustomerRepository {
-  findAll(query: CustomerListQuery = {}): Promise<ICustomerDocument[]> {
-    const filter: FilterQuery<ICustomerDocument> = {};
+  async findAll(query: CustomerListQuery): Promise<CustomerListResult> {
+    const filter: QueryFilter<ICustomerDocument> = {};
 
     if (query.search?.trim()) {
       filter.$text = { $search: query.search.trim() };
     }
 
-    return CustomerModel.find(filter).sort({ createdAt: -1 }).exec();
+    const skip = (query.page - 1) * query.limit;
+
+    const [items, total] = await Promise.all([
+      CustomerModel.find(filter).sort({ createdAt: -1 }).skip(skip).limit(query.limit).exec(),
+      CustomerModel.countDocuments(filter).exec(),
+    ]);
+
+    return { items, total };
   }
 
   findById(customerId: string): Promise<ICustomerDocument | null> {

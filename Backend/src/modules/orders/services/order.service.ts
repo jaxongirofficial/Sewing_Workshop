@@ -1,6 +1,8 @@
 import { Types } from 'mongoose';
 
 import { HttpError } from '../../../shared/errors/http-error';
+import { buildPaginationMeta, type PaginatedResult } from '../../../shared/pagination';
+import { customerRepository, type CustomerRepository } from '../../customers/repositories/customer.repository';
 import { OrderStatus, type IOrderDocument } from '../models/order.model';
 import {
   orderRepository,
@@ -32,11 +34,17 @@ export interface OrderResponse {
 }
 
 export class OrderService {
-  constructor(private readonly repository: OrderRepository = orderRepository) {}
+  constructor(
+    private readonly repository: OrderRepository = orderRepository,
+    private readonly customers: CustomerRepository = customerRepository,
+  ) {}
 
-  async list(query: OrderListQuery): Promise<OrderResponse[]> {
-    const orders = await this.repository.findAll(query);
-    return orders.map((order) => this.mapOrder(order));
+  async list(query: OrderListQuery): Promise<PaginatedResult<OrderResponse>> {
+    const { items, total } = await this.repository.findAll(query);
+    return {
+      items: items.map((order) => this.mapOrder(order)),
+      pagination: buildPaginationMeta(query.page, query.limit, total),
+    };
   }
 
   async create(input: CreateOrderInput): Promise<OrderResponse> {
@@ -45,6 +53,8 @@ export class OrderService {
     if (existing) {
       throw new HttpError(409, 'Order number already exists', 'ORDER_NUMBER_EXISTS');
     }
+
+    await this.assertCustomerExists(input.customerId);
 
     const order = await this.repository.create({
       orderNumber,
@@ -59,6 +69,10 @@ export class OrderService {
   }
 
   async update(orderId: string, input: UpdateOrderInput): Promise<OrderResponse> {
+    if (input.customerId != null) {
+      await this.assertCustomerExists(input.customerId);
+    }
+
     const update = {
       ...(input.orderNumber != null ? { orderNumber: input.orderNumber.trim().toUpperCase() } : {}),
       ...(input.customerId != null ? { customerId: this.toObjectId(input.customerId) } : {}),
@@ -70,7 +84,7 @@ export class OrderService {
 
     if (input.orderNumber != null) {
       const existing = await this.repository.findByOrderNumber(input.orderNumber);
-      if (existing && existing.id !== orderId) {
+      if (existing && existing._id.toString() !== orderId) {
         throw new HttpError(409, 'Order number already exists', 'ORDER_NUMBER_EXISTS');
       }
     }
@@ -99,13 +113,20 @@ export class OrderService {
     }
   }
 
+  private async assertCustomerExists(customerId: string): Promise<void> {
+    const customer = await this.customers.findById(customerId);
+    if (!customer) {
+      throw new HttpError(404, 'Customer not found', 'CUSTOMER_NOT_FOUND');
+    }
+  }
+
   private toObjectId(value: string): Types.ObjectId {
     return new Types.ObjectId(value);
   }
 
   private mapOrder(order: IOrderDocument): OrderResponse {
     return {
-      id: order.id,
+      id: order._id.toString(),
       orderNumber: order.orderNumber,
       customerId: order.customerId.toString(),
       quantity: order.quantity,

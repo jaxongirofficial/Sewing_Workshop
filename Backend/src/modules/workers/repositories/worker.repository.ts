@@ -1,4 +1,4 @@
-import type { FilterQuery, UpdateQuery } from 'mongoose';
+import type { QueryFilter, UpdateQuery } from 'mongoose';
 
 import {
   WorkerModel,
@@ -10,11 +10,18 @@ import {
 export interface WorkerListQuery {
   search?: string;
   status?: WorkerStatus;
+  page: number;
+  limit: number;
+}
+
+export interface WorkerListResult {
+  items: IWorkerDocument[];
+  total: number;
 }
 
 export class WorkerRepository {
-  findAll(query: WorkerListQuery = {}): Promise<IWorkerDocument[]> {
-    const filter: FilterQuery<IWorkerDocument> = {};
+  async findAll(query: WorkerListQuery): Promise<WorkerListResult> {
+    const filter: QueryFilter<IWorkerDocument> = {};
 
     if (query.status) {
       filter.status = query.status;
@@ -24,7 +31,14 @@ export class WorkerRepository {
       filter.$text = { $search: query.search.trim() };
     }
 
-    return WorkerModel.find(filter).sort({ createdAt: -1 }).exec();
+    const skip = (query.page - 1) * query.limit;
+
+    const [items, total] = await Promise.all([
+      WorkerModel.find(filter).sort({ createdAt: -1 }).skip(skip).limit(query.limit).exec(),
+      WorkerModel.countDocuments(filter).exec(),
+    ]);
+
+    return { items, total };
   }
 
   findById(workerId: string): Promise<IWorkerDocument | null> {

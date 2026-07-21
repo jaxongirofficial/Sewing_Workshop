@@ -1,56 +1,57 @@
-import { OrderStatus } from '../models/order.model';
+import type { FastifyReply, FastifyRequest } from 'fastify';
+
+import { successResponse } from '../../../shared/http-response';
 import { orderService, type OrderService } from '../services/order.service';
-import { asyncHandler } from '../../../shared/utils/async-handler';
+import type {
+  CreateOrderBody,
+  ListOrdersQuery,
+  OrderIdParams,
+  UpdateOrderBody,
+  UpdateOrderStatusBody,
+} from '../validators/order.validator';
 
 export class OrderController {
   constructor(private readonly service: OrderService = orderService) {}
 
-  list = asyncHandler(async (req, res) => {
-    const orders = await this.service.list({
-      customerId: typeof req.query.customerId === 'string' ? req.query.customerId : undefined,
-      status: this.parseStatus(req.query.status),
-    });
+  list = async (
+    request: FastifyRequest<{ Querystring: ListOrdersQuery }>,
+    reply: FastifyReply,
+  ): Promise<void> => {
+    const result = await this.service.list(request.query);
+    reply.send(successResponse(result, 'Orders fetched successfully'));
+  };
 
-    res.json({
-      success: true,
-      data: { orders },
-    });
-  });
+  create = async (
+    request: FastifyRequest<{ Body: CreateOrderBody }>,
+    reply: FastifyReply,
+  ): Promise<void> => {
+    const order = await this.service.create(request.body);
+    reply.status(201).send(successResponse({ order }, 'Order created successfully'));
+  };
 
-  create = asyncHandler(async (req, res) => {
-    const order = await this.service.create(req.body);
-    res.status(201).json({
-      success: true,
-      data: { order },
-    });
-  });
+  update = async (
+    request: FastifyRequest<{ Params: OrderIdParams; Body: UpdateOrderBody }>,
+    reply: FastifyReply,
+  ): Promise<void> => {
+    const order = await this.service.update(request.params.orderId, request.body);
+    reply.send(successResponse({ order }, 'Order updated successfully'));
+  };
 
-  update = asyncHandler(async (req, res) => {
-    const order = await this.service.update(req.params.orderId, req.body);
-    res.json({
-      success: true,
-      data: { order },
-    });
-  });
+  updateStatus = async (
+    request: FastifyRequest<{ Params: OrderIdParams; Body: UpdateOrderStatusBody }>,
+    reply: FastifyReply,
+  ): Promise<void> => {
+    const order = await this.service.updateStatus(request.params.orderId, request.body.status);
+    reply.send(successResponse({ order }, 'Order status updated successfully'));
+  };
 
-  updateStatus = asyncHandler(async (req, res) => {
-    const order = await this.service.updateStatus(req.params.orderId, req.body.status);
-    res.json({
-      success: true,
-      data: { order },
-    });
-  });
-
-  delete = asyncHandler(async (req, res) => {
-    await this.service.delete(req.params.orderId);
-    res.status(204).send();
-  });
-
-  private parseStatus(value: unknown): OrderStatus | undefined {
-    return typeof value === 'string' && Object.values(OrderStatus).includes(value as OrderStatus)
-      ? (value as OrderStatus)
-      : undefined;
-  }
+  delete = async (
+    request: FastifyRequest<{ Params: OrderIdParams }>,
+    reply: FastifyReply,
+  ): Promise<void> => {
+    await this.service.delete(request.params.orderId);
+    reply.status(204).send();
+  };
 }
 
 export const orderController = new OrderController();

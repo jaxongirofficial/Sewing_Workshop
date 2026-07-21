@@ -1,20 +1,48 @@
-import { Router } from 'express';
+import type { FastifyInstance } from 'fastify';
+import type { ZodTypeProvider } from 'fastify-type-provider-zod';
 
 import { authenticate } from '../../../middlewares/auth.middleware';
-import { validateRequest } from '../../../middlewares/validate-request';
 import { workerController } from '../controllers/worker.controller';
 import {
-  createWorkerValidator,
-  listWorkersValidator,
-  updateWorkerValidator,
-  workerIdValidator,
+  createWorkerBodySchema,
+  listWorkersQuerySchema,
+  updateWorkerBodySchema,
+  workerIdParamsSchema,
 } from '../validators/worker.validator';
 
-export const workerRouter = Router();
+export const workerRoutes = async (app: FastifyInstance): Promise<void> => {
+  const server = app.withTypeProvider<ZodTypeProvider>();
 
-workerRouter.use(authenticate);
+  server.addHook('preHandler', authenticate);
 
-workerRouter.get('/', listWorkersValidator, validateRequest, workerController.list);
-workerRouter.post('/', createWorkerValidator, validateRequest, workerController.create);
-workerRouter.patch('/:workerId', updateWorkerValidator, validateRequest, workerController.update);
-workerRouter.delete('/:workerId', workerIdValidator, validateRequest, workerController.delete);
+  server.get(
+    '/',
+    { schema: { tags: ['Workers'], security: [{ bearerAuth: [] }], querystring: listWorkersQuerySchema } },
+    workerController.list,
+  );
+
+  server.post(
+    '/',
+    { schema: { tags: ['Workers'], security: [{ bearerAuth: [] }], body: createWorkerBodySchema } },
+    workerController.create,
+  );
+
+  server.patch(
+    '/:workerId',
+    {
+      schema: {
+        tags: ['Workers'],
+        security: [{ bearerAuth: [] }],
+        params: workerIdParamsSchema,
+        body: updateWorkerBodySchema,
+      },
+    },
+    workerController.update,
+  );
+
+  server.delete(
+    '/:workerId',
+    { schema: { tags: ['Workers'], security: [{ bearerAuth: [] }], params: workerIdParamsSchema } },
+    workerController.delete,
+  );
+};

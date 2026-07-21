@@ -18,7 +18,6 @@ const refreshTokenSchema = new Schema<IRefreshTokenDocument>(
       type: Schema.Types.ObjectId,
       ref: 'User',
       required: true,
-      index: true,
     },
     tokenHash: {
       type: String,
@@ -29,7 +28,6 @@ const refreshTokenSchema = new Schema<IRefreshTokenDocument>(
     expiresAt: {
       type: Date,
       required: true,
-      index: true,
     },
     revokedAt: {
       type: Date,
@@ -42,6 +40,7 @@ const refreshTokenSchema = new Schema<IRefreshTokenDocument>(
   },
 );
 
+// Indexlar
 refreshTokenSchema.index({ userId: 1, expiresAt: 1 });
 refreshTokenSchema.index({ expiresAt: 1 }, { expireAfterSeconds: 0 });
 
