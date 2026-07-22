@@ -21,6 +21,14 @@ export class OrderController {
     reply.send(successResponse(result, 'Orders fetched successfully'));
   };
 
+  getById = async (
+    request: FastifyRequest<{ Params: OrderIdParams }>,
+    reply: FastifyReply,
+  ): Promise<void> => {
+    const order = await this.service.getById(request.params.orderId);
+    reply.send(successResponse({ order }, 'Order fetched successfully'));
+  };
+
   create = async (
     request: FastifyRequest<{ Body: CreateOrderBody }>,
     reply: FastifyReply,

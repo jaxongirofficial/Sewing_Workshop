@@ -47,6 +47,14 @@ export class OrderService {
     };
   }
 
+  async getById(orderId: string): Promise<OrderResponse> {
+    const order = await this.repository.findById(orderId);
+    if (!order) {
+      throw new HttpError(404, 'Order not found', 'ORDER_NOT_FOUND');
+    }
+    return this.mapOrder(order);
+  }
+
   async create(input: CreateOrderInput): Promise<OrderResponse> {
     const orderNumber = input.orderNumber.trim().toUpperCase();
     const existing = await this.repository.findByOrderNumber(orderNumber);

@@ -20,6 +20,14 @@ export class WorkerController {
     reply.send(successResponse(result, 'Workers fetched successfully'));
   };
 
+  getById = async (
+    request: FastifyRequest<{ Params: WorkerIdParams }>,
+    reply: FastifyReply,
+  ): Promise<void> => {
+    const worker = await this.service.getById(request.params.workerId);
+    reply.send(successResponse({ worker }, 'Worker fetched successfully'));
+  };
+
   create = async (
     request: FastifyRequest<{ Body: CreateWorkerBody }>,
     reply: FastifyReply,

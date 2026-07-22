@@ -1,6 +1,7 @@
 import dotenv from 'dotenv';
 
-dotenv.config();
+// quiet: true - dotenv'ning konsolga chiqaradigan reklama/tip xabarlarini o'chiradi.
+dotenv.config({ quiet: true });
 
 const readEnv = (key: string, fallback?: string): string => {
   const value = process.env[key] ?? fallback;

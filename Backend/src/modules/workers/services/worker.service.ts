@@ -39,6 +39,14 @@ export class WorkerService {
     };
   }
 
+  async getById(workerId: string): Promise<WorkerResponse> {
+    const worker = await this.repository.findById(workerId);
+    if (!worker) {
+      throw new HttpError(404, 'Worker not found', 'WORKER_NOT_FOUND');
+    }
+    return this.mapWorker(worker);
+  }
+
   async create(input: CreateWorkerInput): Promise<WorkerResponse> {
     const worker = await this.repository.create({
       fullName: input.fullName.trim(),

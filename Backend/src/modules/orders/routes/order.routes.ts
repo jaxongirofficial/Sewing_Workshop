@@ -2,6 +2,8 @@ import type { FastifyInstance } from 'fastify';
 import type { ZodTypeProvider } from 'fastify-type-provider-zod';
 
 import { authenticate } from '../../../middlewares/auth.middleware';
+import { requireRole } from '../../../middlewares/role.middleware';
+import { UserRole } from '../../auth/models/user.model';
 import { orderController } from '../controllers/order.controller';
 import {
   createOrderBodySchema,
@@ -20,6 +22,12 @@ export const orderRoutes = async (app: FastifyInstance): Promise<void> => {
     '/',
     { schema: { tags: ['Orders'], security: [{ bearerAuth: [] }], querystring: listOrdersQuerySchema } },
     orderController.list,
+  );
+
+  server.get(
+    '/:orderId',
+    { schema: { tags: ['Orders'], security: [{ bearerAuth: [] }], params: orderIdParamsSchema } },
+    orderController.getById,
   );
 
   server.post(
@@ -54,9 +62,14 @@ export const orderRoutes = async (app: FastifyInstance): Promise<void> => {
     orderController.updateStatus,
   );
 
-  server.delete(
-    '/:orderId',
-    { schema: { tags: ['Orders'], security: [{ bearerAuth: [] }], params: orderIdParamsSchema } },
-    orderController.delete,
-  );
+  await server.register(async (adminScope) => {
+    const scoped = adminScope.withTypeProvider<ZodTypeProvider>();
+    scoped.addHook('preHandler', requireRole(UserRole.Admin, UserRole.Manager));
+
+    scoped.delete(
+      '/:orderId',
+      { schema: { tags: ['Orders'], security: [{ bearerAuth: [] }], params: orderIdParamsSchema } },
+      orderController.delete,
+    );
+  });
 };
