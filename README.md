@@ -1,4 +1,22 @@
-# sewing_workshop
+# Sewing Workshop
+
+## Backend connection
+
+The Flutter app now connects to the API in `Backend/` for phone authentication and worker records; its UI has not been redesigned.
+
+1. Copy `Backend/.env.example` to `Backend/.env` and replace both JWT secrets.
+2. Start MongoDB locally (or update `MONGODB_URI`).
+3. In `Backend`, run `npm install`, `npm run seed:admin`, then `npm run dev`.
+
+The seeded development login is `998901112233` / `ChangeMe123!`.
+
+For an Android emulator:
+
+```bash
+flutter run --dart-define=API_BASE_URL=http://10.0.2.2:5000/api
+```
+
+For a physical phone, use your computer's LAN IP instead of `10.0.2.2`. Local HTTP is enabled for Android development only; use HTTPS for production.
 
 A new Flutter project.
 

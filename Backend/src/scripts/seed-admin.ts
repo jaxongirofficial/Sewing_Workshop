@@ -3,7 +3,7 @@
  * mavjud foydalanuvchini Admin qilib belgilash uchun ishlatiladi.
  *
  * Ishlatish:
- *   npm run seed:admin -- --email=admin@sewing.com --password=StrongPass123 --name="Bosh Admin"
+ *   npm run seed:admin -- --email=admin@sewing.com --phone=998901112233 --password=StrongPass123 --name="Bosh Admin"
  *
  * Agar shu email bilan foydalanuvchi mavjud bo'lsa — uning roli "admin"ga
  * o'zgartiriladi (parol o'zgarmaydi, agar --password berilmasa).
@@ -17,6 +17,7 @@ import { UserModel, UserRole } from '../modules/auth/models/user.model';
 
 interface ParsedArgs {
   email?: string;
+  phone?: string;
   password?: string;
   name?: string;
 }
@@ -27,7 +28,7 @@ const parseArgs = (): ParsedArgs => {
     const match = arg.match(/^--([^=]+)=(.*)$/);
     if (!match) continue;
     const [, key, value] = match;
-    if (key === 'email' || key === 'password' || key === 'name') {
+    if (key === 'email' || key === 'phone' || key === 'password' || key === 'name') {
       result[key] = value;
     }
   }
@@ -40,9 +41,14 @@ const run = async (): Promise<void> => {
   const email = (args.email ?? 'admin@sewing.com').toLowerCase().trim();
   const password = args.password ?? 'ChangeMe123!';
   const fullName = args.name ?? 'Bosh Admin';
+  const phone = args.phone ?? '998901112233';
 
   if (password.length < 8) {
     console.error('Xato: parol kamida 8 belgidan iborat bo\'lishi kerak.');
+    process.exit(1);
+  }
+  if (!/^998\d{9}$/.test(phone)) {
+    console.error('Xato: telefon 998XXXXXXXXX formatida bo\'lishi kerak.');
     process.exit(1);
   }
 
@@ -52,6 +58,7 @@ const run = async (): Promise<void> => {
 
   if (existing) {
     existing.role = UserRole.Admin;
+    existing.phone = phone;
     if (args.password) {
       existing.password = await bcrypt.hash(password, env.bcryptSaltRounds);
     }
@@ -62,11 +69,13 @@ const run = async (): Promise<void> => {
     await UserModel.create({
       fullName,
       email,
+      phone,
       password: hashed,
       role: UserRole.Admin,
     });
     console.log('✅ Yangi Admin foydalanuvchi yaratildi:');
     console.log(`   Email: ${email}`);
+    console.log(`   Telefon: ${phone}`);
     console.log(`   Parol: ${password}`);
     console.log('   Diqqat: shu parol bilan tizimga kiring va keyin xohlasangiz o\'zgartiring.');
   }

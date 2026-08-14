@@ -20,6 +20,7 @@ import { customerRoutes } from './modules/customers/routes/customer.routes';
 import { orderRoutes } from './modules/orders/routes/order.routes';
 import { paymentRoutes } from './modules/payments/routes/payment.routes';
 import { workerRoutes } from './modules/workers/routes/worker.routes';
+import { workshopRoutes } from './modules/workshop/routes/workshop.routes';
 import { successResponse } from './shared/http-response';
 
 export const buildApp = async (): Promise<FastifyInstance> => {
@@ -37,7 +38,7 @@ export const buildApp = async (): Promise<FastifyInstance> => {
 
   await app.register(helmet);
   await app.register(cors, {
-    origin: env.clientOrigin,
+    origin: env.clientOrigin === '*' ? true : env.clientOrigin,
     credentials: true,
   });
   await app.register(cookie);
@@ -83,6 +84,7 @@ export const buildApp = async (): Promise<FastifyInstance> => {
   await app.register(orderRoutes, { prefix: '/api/orders' });
   await app.register(paymentRoutes, { prefix: '/api/payments' });
   await app.register(workerRoutes, { prefix: '/api/workers' });
+  await app.register(workshopRoutes, { prefix: '/api' });
 
   return app;
 };

@@ -9,6 +9,7 @@ export enum UserRole {
 export interface IUser {
   fullName: string;
   email: string;
+  phone: string;
   password: string;
   role: UserRole;
 }
@@ -34,6 +35,14 @@ const userSchema = new Schema<IUserDocument>(
       trim: true,
       lowercase: true,
       maxlength: 160,
+      index: true,
+    },
+    phone: {
+      type: String,
+      required: true,
+      unique: true,
+      trim: true,
+      match: /^998\d{9}$/,
       index: true,
     },
     password: {

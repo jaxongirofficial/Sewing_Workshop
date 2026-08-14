@@ -26,12 +26,14 @@ final class AuthUserModel {
     required this.id,
     required this.fullName,
     required this.email,
+    required this.phone,
     required this.role,
   });
 
   final String id;
   final String fullName;
   final String email;
+  final String phone;
   final String role;
 
   factory AuthUserModel.fromJson(Map<String, dynamic> json) {
@@ -39,6 +41,7 @@ final class AuthUserModel {
       id: json['id'] as String,
       fullName: json['fullName'] as String,
       email: json['email'] as String,
+      phone: json['phone'] as String,
       role: json['role'] as String,
     );
   }
@@ -47,7 +50,7 @@ final class AuthUserModel {
     return AppUser(
       id: id,
       displayName: fullName,
-      phone: email,
+      phone: phone,
       role: switch (role) {
         'admin' => UserRole.owner,
         'manager' => UserRole.manager,

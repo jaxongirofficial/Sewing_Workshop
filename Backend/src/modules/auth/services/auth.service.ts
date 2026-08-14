@@ -10,11 +10,12 @@ import { UserRole, type IUserDocument } from '../models/user.model';
 export interface RegisterInput {
   fullName: string;
   email: string;
+  phone: string;
   password: string;
 }
 
 export interface LoginInput {
-  email: string;
+  phone: string;
   password: string;
 }
 
@@ -22,6 +23,7 @@ export interface AuthUserResponse {
   id: string;
   fullName: string;
   email: string;
+  phone: string;
   role: UserRole;
 }
 
@@ -62,11 +64,16 @@ export class AuthService {
     if (existing) {
       throw new HttpError(409, 'Email is already registered', 'EMAIL_ALREADY_REGISTERED');
     }
+    const existingPhone = await this.repository.findUserByPhone(input.phone);
+    if (existingPhone) {
+      throw new HttpError(409, 'Phone is already registered', 'PHONE_ALREADY_REGISTERED');
+    }
 
     const password = await bcrypt.hash(input.password, env.bcryptSaltRounds);
     const user = await this.repository.createUser({
       fullName: input.fullName.trim(),
       email: input.email.toLowerCase().trim(),
+      phone: input.phone.trim(),
       password,
       role: UserRole.Staff,
     });
@@ -75,14 +82,14 @@ export class AuthService {
   }
 
   async login(input: LoginInput): Promise<AuthSessionResponse> {
-    const user = await this.repository.findUserByEmail(input.email, true);
+    const user = await this.repository.findUserByPhone(input.phone, true);
     if (!user) {
-      throw new HttpError(401, 'Invalid email or password', 'INVALID_CREDENTIALS');
+      throw new HttpError(401, 'Invalid phone or password', 'INVALID_CREDENTIALS');
     }
 
     const isValid = await bcrypt.compare(input.password, user.password);
     if (!isValid) {
-      throw new HttpError(401, 'Invalid email or password', 'INVALID_CREDENTIALS');
+      throw new HttpError(401, 'Invalid phone or password', 'INVALID_CREDENTIALS');
     }
 
     return this.createSession(user);
@@ -180,6 +187,7 @@ export class AuthService {
       id: user._id.toString(),
       fullName: user.fullName,
       email: user.email,
+      phone: user.phone,
       role: user.role,
     };
   }

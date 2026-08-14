@@ -30,7 +30,7 @@ final class OrderApiService {
       options: AuthHeaders.bearer(accessToken),
     );
 
-    return ApiResponseParser.list(response.data, key: 'orders', context: 'Orders')
+    return ApiResponseParser.list(response.data, key: 'items', context: 'Orders')
         .map(OrderModel.fromJson)
         .toList(growable: false);
   }

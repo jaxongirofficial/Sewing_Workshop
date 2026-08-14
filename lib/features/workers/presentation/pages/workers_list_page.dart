@@ -8,23 +8,40 @@ import '../../../../core/enums/user_role.dart';
 import '../../../../l10n/s.dart';
 import '../../../../shared/widgets/brand/brand_dashboard_backdrop.dart';
 import '../../../../shared/widgets/brand/brand_surface.dart';
-import '../../../workshop/presentation/providers/workshop_mock_providers.dart';
+import '../providers/workers_provider.dart';
 import '../widgets/worker_tile.dart';
 import '../widgets/workers_header_summary.dart';
 
 /// Jamoa / ishchilar to'liq ro'yxati.
-class WorkersListPage extends ConsumerWidget {
+class WorkersListPage extends ConsumerStatefulWidget {
   const WorkersListPage({super.key, this.role});
 
   final UserRole? role;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<WorkersListPage> createState() => _WorkersListPageState();
+}
+
+class _WorkersListPageState extends ConsumerState<WorkersListPage> {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      ref.read(workersProvider.notifier).load();
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
     final s = S.of(context);
-    final workers = ref.watch(workshopWorkersProvider);
-    final canAddEmployee = role == UserRole.owner;
+    final workersState = ref.watch(workersProvider);
+    final workers = workersState.valueOrNull
+            ?.map((worker) => worker.toWorkshopWorker())
+            .toList(growable: false) ??
+        const [];
+    final canAddEmployee = widget.role == UserRole.owner;
 
     return Stack(
       fit: StackFit.expand,
@@ -54,7 +71,9 @@ class WorkersListPage extends ConsumerWidget {
               : null,
           body: SafeArea(
             top: false,
-            child: workers.isEmpty
+            child: workersState.isLoading
+                ? const Center(child: CircularProgressIndicator())
+                : workers.isEmpty
                 ? _EmptyWithAdd(
                     canAdd: canAddEmployee,
                     onAdd: () => context.push(AppRoutes.ownerAddEmployee),

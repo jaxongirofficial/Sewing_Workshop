@@ -73,15 +73,15 @@ final class AuthNotifier extends StateNotifier<AuthState> {
   }) async {
     state = state.copyWith(isLoading: true, clearError: true);
     try {
-      final user = await _repository.signIn(phone: phone, password: password);
-      if (user == null) {
-        state = state.copyWith(
-          isLoading: false,
-          error: AuthFailure.invalidCredentials,
-        );
-        return false;
-      }
-      state = AuthState(user: user);
+      final result = await _repository.loginWithEmail(
+        email: phone,
+        password: password,
+      );
+      state = AuthState(
+        user: result.user,
+        accessToken: result.accessToken,
+        refreshToken: result.refreshToken,
+      );
       return true;
     } catch (e, st) {
       debugPrint('signIn failed: $e\n$st');
@@ -122,6 +122,7 @@ final class AuthNotifier extends StateNotifier<AuthState> {
   Future<bool> register({
     required String fullName,
     required String email,
+    required String phone,
     required String password,
     String? role,
   }) async {
@@ -130,6 +131,7 @@ final class AuthNotifier extends StateNotifier<AuthState> {
       final result = await _repository.register(
         fullName: fullName,
         email: email,
+        phone: phone,
         password: password,
         role: role,
       );
@@ -168,7 +170,14 @@ final class AuthNotifier extends StateNotifier<AuthState> {
 
   Future<void> signOut() async {
     state = state.copyWith(isLoading: true, clearError: true);
-    await _repository.signOut();
+    final refreshToken = state.refreshToken;
+    if (refreshToken != null && refreshToken.isNotEmpty) {
+      try {
+        await _repository.signOut(refreshToken);
+      } catch (e, st) {
+        debugPrint('signOut failed: $e\n$st');
+      }
+    }
     state = const AuthState();
   }
 }

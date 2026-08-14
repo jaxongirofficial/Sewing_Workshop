@@ -15,6 +15,11 @@ export class AuthRepository {
     return includePassword ? query.select('+password').exec() : query.exec();
   }
 
+  findUserByPhone(phone: string, includePassword = false): Promise<IUserDocument | null> {
+    const query = UserModel.findOne({ phone: phone.trim() });
+    return includePassword ? query.select('+password').exec() : query.exec();
+  }
+
   findUserById(userId: string): Promise<IUserDocument | null> {
     return UserModel.findById(userId).exec();
   }

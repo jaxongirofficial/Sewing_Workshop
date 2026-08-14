@@ -32,7 +32,7 @@ final class PaymentApiService {
       options: AuthHeaders.bearer(accessToken),
     );
 
-    return ApiResponseParser.list(response.data, key: 'payments', context: 'Payments')
+    return ApiResponseParser.list(response.data, key: 'items', context: 'Payments')
         .map(PaymentModel.fromJson)
         .toList(growable: false);
   }

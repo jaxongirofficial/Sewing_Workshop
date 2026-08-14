@@ -44,11 +44,8 @@ final class ApiService {
     Object? data,
     Options? options,
   }) {
-    return _dio.post<Map<String, dynamic>>(
-      path,
-      data: data,
-      options: options,
-    );
+    print(path);
+    return _dio.post<Map<String, dynamic>>(path, data: data, options: options);
   }
 
   Future<Response<Map<String, dynamic>>> patch(
@@ -56,7 +53,15 @@ final class ApiService {
     Object? data,
     Options? options,
   }) {
-    return _dio.patch<Map<String, dynamic>>(
+    return _dio.patch<Map<String, dynamic>>(path, data: data, options: options);
+  }
+
+  Future<Response<Map<String, dynamic>>> put(
+    String path, {
+    Object? data,
+    Options? options,
+  }) {
+    return _dio.put<Map<String, dynamic>>(
       path,
       data: data,
       options: options,

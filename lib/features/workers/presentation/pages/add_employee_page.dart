@@ -7,8 +7,8 @@ import '../../../../l10n/s.dart';
 import '../../../../shared/widgets/brand/brand_dashboard_backdrop.dart';
 import '../../../../shared/widgets/brand/brand_primary_button.dart';
 import '../../../../shared/widgets/brand/brand_text_field.dart';
-import '../../../workshop/models/workshop_mock_models.dart';
-import '../../../workshop/presentation/providers/workshop_mock_providers.dart';
+import '../../data/dto/worker_dto.dart';
+import '../providers/workers_provider.dart';
 import '../widgets/add_employee_birth_date_field.dart';
 import '../widgets/add_employee_header_hero.dart';
 import '../widgets/add_employee_role_chip.dart';
@@ -83,29 +83,29 @@ class _AddEmployeePageState extends ConsumerState<AddEmployeePage> {
     }
 
     setState(() => _submitting = true);
-    await Future<void>.delayed(const Duration(milliseconds: 350));
-
-    final employee = Employee(
-      id: 'emp-${DateTime.now().millisecondsSinceEpoch}',
-      firstName: _firstName.text.trim(),
-      lastName: _lastName.text.trim(),
-      phone: UzbekPhoneInputFormatter.normalizeForSubmit(_phone.text),
-      role: _role,
-      birthDate: _birthDate,
+    final fullName = '${_firstName.text.trim()} ${_lastName.text.trim()}';
+    await ref.read(workersProvider.notifier).create(
+      WorkerRequestDto(
+        fullName: fullName,
+        phone: UzbekPhoneInputFormatter.normalizeForSubmit(_phone.text),
+        position: _role,
+        salary: 0,
+      ),
     );
-
-    ref.read(employeesProvider.notifier).add(employee);
-    ref.read(attendanceProvider.notifier).addIfMissing(
-          id: employee.id,
-          name: employee.fullName,
-        );
 
     if (!mounted) return;
     setState(() => _submitting = false);
 
+    if (ref.read(workersProvider).hasError) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(S.of(context).genericError)),
+      );
+      return;
+    }
+
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text(s.employeeAddedSnack(employee.fullName)),
+        content: Text(s.employeeAddedSnack(fullName)),
         backgroundColor: AppColors.success,
         behavior: SnackBarBehavior.floating,
       ),

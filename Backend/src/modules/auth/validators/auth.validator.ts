@@ -3,11 +3,12 @@ import { z } from 'zod';
 export const registerBodySchema = z.object({
   fullName: z.string().trim().min(2).max(120),
   email: z.string().trim().toLowerCase().email(),
+  phone: z.string().regex(/^998\d{9}$/, 'Phone must use the 998XXXXXXXXX format'),
   password: z.string().min(8).max(128),
 });
 
 export const loginBodySchema = z.object({
-  email: z.string().trim().toLowerCase().email(),
+  phone: z.string().regex(/^998\d{9}$/, 'Phone must use the 998XXXXXXXXX format'),
   password: z.string().min(1),
 });
 

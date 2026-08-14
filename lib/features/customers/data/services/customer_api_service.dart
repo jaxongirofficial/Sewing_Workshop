@@ -28,7 +28,7 @@ final class CustomerApiService {
       options: AuthHeaders.bearer(accessToken),
     );
 
-    return ApiResponseParser.list(response.data, key: 'customers', context: 'Customers')
+    return ApiResponseParser.list(response.data, key: 'items', context: 'Customers')
         .map(CustomerModel.fromJson)
         .toList(growable: false);
   }

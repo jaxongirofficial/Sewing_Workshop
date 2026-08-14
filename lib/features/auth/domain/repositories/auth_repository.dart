@@ -26,11 +26,12 @@ abstract interface class AuthRepository {
   Future<AuthResult> register({
     required String fullName,
     required String email,
+    required String phone,
     required String password,
     String? role,
   });
 
   Future<AuthResult> refreshToken(String refreshToken);
 
-  Future<void> signOut();
+  Future<void> signOut(String refreshToken);
 }

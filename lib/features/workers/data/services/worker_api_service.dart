@@ -30,7 +30,7 @@ final class WorkerApiService {
       options: AuthHeaders.bearer(accessToken),
     );
 
-    return ApiResponseParser.list(response.data, key: 'workers', context: 'Workers')
+    return ApiResponseParser.list(response.data, key: 'items', context: 'Workers')
         .map(WorkerModel.fromJson)
         .toList(growable: false);
   }
